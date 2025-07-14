@@ -558,7 +558,7 @@ export default class TmpAssembler {
         _linesWidth.push(letterRight);
 
         _numberOfLines = lineIndex + 1;
-        _textDesiredHeight = _numberOfLines * _lineHeight * this._getFontScale();
+        _textDesiredHeight = _numberOfLines * _lineHeight * this._getFontScale();0
         if (_numberOfLines > 1) {
             _textDesiredHeight += (_numberOfLines - 1) * _lineSpacing;
         }

@@ -12,8 +12,6 @@
   "_defines": [
     {
       "USE_TEXTURE_LEVEL_1": true,
-      "USE_TEXTURE_LEVEL_2": true,
-      "USE_TEXTURE_LEVEL_3": true,
       "USE_OUTLINE": true,
       "USE_UNDERLAY": true,
       "USE_GLOW": true
@@ -34,7 +32,7 @@
     {
       "alphaThreshold": 0.1,
       "texture0": {
-        "__uuid__": "c395b07f-6f97-421c-b6bc-b501fc13a4c1@6c48a",
+        "__uuid__": "a2ede75a-fb29-4814-887e-10c42d865185@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
       "texture1": {
