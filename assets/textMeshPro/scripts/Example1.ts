@@ -98,7 +98,7 @@ export default class Example1 extends Component {
     public alpha: number = 0;
     private async anim3(): Promise<void> {
         await TmpUtils.waitCmpt(this, 1);
-        this.text3.string = "这 是 一 段 测 试 文 字aaagghjsa;dzxmc;";
+        this.text3.string = "sdfhsdghsdhgsfghsfghaagghjsa;dzxmc;";
         this.text3.updateRenderData(true);
         for (let i = 0; i < this.text3.string.length; i++) {
             this.text3.setVisible(i, false);

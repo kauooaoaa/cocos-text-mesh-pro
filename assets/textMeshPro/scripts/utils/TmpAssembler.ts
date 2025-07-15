@@ -312,33 +312,8 @@ export default class TmpAssembler {
     }
 
     private static _updateContent(): void {
-        this._computeHorizontalKerningForText();
         this._alignText();
-    }
-
-    private static _computeHorizontalKerningForText(): void {
-        let string = _string;
-        let stringLen = string.length;
-
-        let horizontalKernings = _horizontalKernings;
-        let kerningDict;
-        // _fntConfig && (kerningDict = _fntConfig.kerningDict);
-        // if (kerningDict && !cc.js.isEmptyObject(kerningDict)) {
-        //     let prev = -1;
-        //     for (let i = 0; i < stringLen; ++i) {
-        //         let key = string.charCodeAt(i);
-        //         let kerningAmount = kerningDict[(prev << 16) | (key & 0xffff)] || 0;
-        //         if (i < stringLen - 1) {
-        //             horizontalKernings[i] = kerningAmount;
-        //         } else {
-        //             horizontalKernings[i] = 0;
-        //         }
-        //         prev = key;
-        //     }
-        // } else {
-        horizontalKernings.length = 0;
-        // }
-    }
+    }   
 
     private static _alignText(): void {
         _textDesiredHeight = 0;
@@ -1067,25 +1042,25 @@ export default class TmpAssembler {
                 if (dataList.length < offset + 4) {
                     break;
                 }
-
+                log(dataList[offset])
                 tempColor.set(WHITE);
                 tempColor.a *= alpha;
-                comp.colorGradient && tempColor.multiply(comp.colorLB);
+                comp.vertexColorGradient && tempColor.multiply(comp.colorLB);
                 dataList[offset]["colorExtra"].set(tempColor);
 
                 tempColor.set(WHITE);
                 tempColor.a *= alpha;
-                comp.colorGradient && tempColor.multiply(comp.colorRB);
+                comp.vertexColorGradient && tempColor.multiply(comp.colorRB);
                 dataList[offset + 1]["colorExtra"].set(tempColor);
 
                 tempColor.set(WHITE);
                 tempColor.a *= alpha;
-                comp.colorGradient && tempColor.multiply(comp.colorLT);
+                comp.vertexColorGradient && tempColor.multiply(comp.colorLT);
                 dataList[offset + 2]["colorExtra"].set(tempColor);
 
                 tempColor.set(WHITE);
                 tempColor.a *= alpha;
-                comp.colorGradient && tempColor.multiply(comp.colorRT);
+                comp.vertexColorGradient && tempColor.multiply(comp.colorRT);
                 dataList[offset + 3]["colorExtra"].set(tempColor);
             }
         } else {
@@ -1108,22 +1083,22 @@ export default class TmpAssembler {
 
                     tempColor.set(WHITE);
                     tempColor.a *= alpha;
-                    comp.colorGradient && tempColor.multiply(comp.colorLB);
+                    comp.vertexColorGradient && tempColor.multiply(comp.colorLB);
                     dataList[offset]["colorExtra"].set(tempColor);
 
                     tempColor.set(WHITE);
                     tempColor.a *= alpha;
-                    comp.colorGradient && tempColor.multiply(comp.colorRB);
+                    comp.vertexColorGradient && tempColor.multiply(comp.colorRB);
                     dataList[offset + 1]["colorExtra"].set(tempColor);
 
                     tempColor.set(WHITE);
                     tempColor.a *= alpha;
-                    comp.colorGradient && tempColor.multiply(comp.colorLT);
+                    comp.vertexColorGradient && tempColor.multiply(comp.colorLT);
                     dataList[offset + 2]["colorExtra"].set(tempColor);
 
                     tempColor.set(WHITE);
                     tempColor.a *= alpha;
-                    comp.colorGradient && tempColor.multiply(comp.colorRT);
+                    comp.vertexColorGradient && tempColor.multiply(comp.colorRT);
                     dataList[offset + 3]["colorExtra"].set(tempColor);
 
                     let colorExtraOffset = offset * this.floatsPerVert + this.colorExtraOffset;
@@ -1180,22 +1155,22 @@ export default class TmpAssembler {
 
         tempColor.set(WHITE);
         tempColor.a *= alpha;
-        comp.colorGradient && tempColor.multiply(comp.colorLB);
+        comp.vertexColorGradient && tempColor.multiply(comp.colorLB);
         dataList[offset]["colorExtra"].set(tempColor);
 
         tempColor.set(WHITE);
         tempColor.a *= alpha;
-        comp.colorGradient && tempColor.multiply(comp.colorRB);
+        comp.vertexColorGradient && tempColor.multiply(comp.colorRB);
         dataList[offset + 1]["colorExtra"].set(tempColor);
 
         tempColor.set(WHITE);
         tempColor.a *= alpha;
-        comp.colorGradient && tempColor.multiply(comp.colorLT);
+        comp.vertexColorGradient && tempColor.multiply(comp.colorLT);
         dataList[offset + 2]["colorExtra"].set(tempColor);
 
         tempColor.set(WHITE);
         tempColor.a *= alpha;
-        comp.colorGradient && tempColor.multiply(comp.colorRT);
+        comp.vertexColorGradient && tempColor.multiply(comp.colorRT);
         dataList[offset + 3]["colorExtra"].set(tempColor);
 
         if (JSB) {

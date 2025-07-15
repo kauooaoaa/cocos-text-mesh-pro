@@ -14,7 +14,6 @@
       "USE_TEXTURE_LEVEL_1": true,
       "USE_TEXTURE_LEVEL_2": true,
       "USE_TEXTURE_LEVEL_3": true,
-      "USE_OUTLINE": true,
       "USE_UNDERLAY": true,
       "USE_GLOW": true
     }

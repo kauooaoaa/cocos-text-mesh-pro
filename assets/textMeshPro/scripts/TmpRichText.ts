@@ -24,7 +24,7 @@ interface ISegment {
 }
 
 /**
- * 富文本池
+ * Rich text pool
  */
 const labelPool: any = new js.Pool((seg: ISegment) => {
     if (DEV) {
@@ -74,7 +74,8 @@ function getSegmentByPool(type: string, content: string | SpriteFrame, mat?: Mat
         seg.comp.spriteFrame = content as SpriteFrame;
         seg.comp.type = Sprite.Type.SLICED;
         seg.comp.sizeMode = Sprite.SizeMode.CUSTOM;
-    } else { // RichTextChildName
+    } else { // Rich text child name
+
         seg.comp = node.getComponent(TextMeshPro) || node.addComponent(TextMeshPro);
         if (mat) {
             seg.comp.customMaterial = mat;
@@ -98,7 +99,7 @@ function getSegmentByPool(type: string, content: string | SpriteFrame, mat?: Mat
 }
 
 /**
- * TextMeshPro富文本组件
+ * TextMeshPro rich text component
  */
 @ccclass
 @disallowMultiple
@@ -113,6 +114,7 @@ export default class TmpRichText extends Component {
         if (this._string === v) { return; }
         this._string = v;
         // this._layoutDirty = true;
+
         this._updateRichText();
     }
 
@@ -226,7 +228,8 @@ export default class TmpRichText extends Component {
     private _layoutDirty: boolean = true;
     private _labelChildrenNum = 0;
 
-    // 文本父节点
+    // Text parent node
+
     private _labelContent: Node = null;
     private get labelContent(): Node {
         if (!this._labelContent) {
@@ -237,7 +240,8 @@ export default class TmpRichText extends Component {
         }
         return this._labelContent;
     }
-    // 图片父节点
+    // Image parent node
+
     private _imageContent: Node = null;
     private get imageContent(): Node {
         if (!this._imageContent) {
@@ -251,7 +255,8 @@ export default class TmpRichText extends Component {
 
     private editorInit(): void {
         if (EDITOR) {
-            // 加载图集
+            // Loading the picture set
+
             if (!this._font || !this._font["_uuid"]) {
                 this.textures = [];
                 this._layoutDirty = true;
@@ -293,6 +298,7 @@ export default class TmpRichText extends Component {
         if (EDITOR) {
             // Because undo/redo will not call onEnable/onDisable,
             // we need call onEnable/onDisable manually to active/disactive children nodes.
+
             if (this.enabledInHierarchy) {
                 this.onEnable();
             }
@@ -381,8 +387,10 @@ export default class TmpRichText extends Component {
                 } else {
                     // const thisPartSplitResultArr = this.splitLongStringOver2048(multilineTexts[i], styleIndex);
                     // If it is not the first element, it is right behind a "\n", so we should reset the lineOffsetX as 0.
+
                     let currOffsetX = i === 0 ? this._lineOffsetX : 0;
                     // Hack: Special switching line could reserve fontSize-length space
+
                     if (currOffsetX >= this.maxWidth - this.fontSize) {
                         currOffsetX = 0;
                     }
@@ -407,22 +415,28 @@ export default class TmpRichText extends Component {
         let leftString = longStr.substring(curEnd);
         // let curStringSize = this._calculateSize(styleIndex, curString);
         // let leftStringSize = this._calculateSize(styleIndex, leftString);
+
         let curStringSizeX = this._calculateSize(styleIndex, curString).x;
 
         // a line should be an unit to split long string
+
         const lineCountForOnePart = 1;
-        // const sizeForOnePart = lineCountForOnePart * this.maxWidth;
+        // const sizeForOnePart = lineCountForOnePart *this.maxWidth;
+
         let sizeForThisPart = (lineCountForOnePart * this.maxWidth === 0 || lineCountForOnePart * this.maxWidth > 2048) ? 2048 : (lineCountForOnePart * this.maxWidth);
 
         // it does influence the first element of splitted array,
         // the element should put into the left space in current line
+
         sizeForThisPart -= lineOffsetX;
 
         // divide text into some pieces of which the size is less than sizeForOnePart
         // while (curStringSize.x > sizeForOnePart) {
+
         while (curStringSizeX > sizeForThisPart) {
             curEnd /= 2;
             // at least one char can be an entity, step back.
+
             if (curEnd < 1) {
                 curEnd *= 2;
                 break;
@@ -431,23 +445,29 @@ export default class TmpRichText extends Component {
             curString = curString.substring(curStart, curEnd);
             leftString = longStr.substring(curEnd);
             // curStringSize = this._calculateSize(styleIndex, curString);
+
             curStringSizeX = this._calculateSize(styleIndex, curString).x;
         }
 
         // avoid too many loops
+
         let leftTryTimes = 1000;
         // the minimum step of expansion or reduction
+
         let curWordStep = 1;
         while (leftTryTimes && curStart < text.length) {
             // while (leftTryTimes && curStringSize.x < sizeForOnePart) {
+
             while (leftTryTimes && curStringSizeX < sizeForThisPart) {
                 // if all the characters are consumed, the size cannot reach sizeForThisPart, we should break the loop
+
                 if (!leftString) {
                     break;
                 }
 
                 const nextPartExec = TmpUtils.getEnglishWordPartAtFirst(leftString);
                 // add a character, unless there is a complete word at the beginning of the next line
+
                 if (nextPartExec && nextPartExec.length > 0) {
                     curWordStep = nextPartExec[0].length;
                 }
@@ -456,6 +476,7 @@ export default class TmpRichText extends Component {
                 curString = longStr.substring(curStart, curEnd);
                 leftString = longStr.substring(curEnd);
                 // curStringSize = this._calculateSize(styleIndex, curString);
+
                 curStringSizeX = this._calculateSize(styleIndex, curString).x;
 
                 leftTryTimes--;
@@ -463,32 +484,38 @@ export default class TmpRichText extends Component {
 
             // reduce condition：size > maxwidth && curString.length >= 2
             // while (leftTryTimes && curString.length >= 2 && curStringSize.x > sizeForOnePart) {
+
             while (leftTryTimes && curString.length >= 2 && curStringSizeX > sizeForThisPart) {
                 curEnd -= curWordStep;
                 //     curString = longStr.substring(curStart, curEnd);
                 //     curStringSize = this._calculateSize(styleIndex, curString);
-                //     // after the first reduction, the step should be 1.
+                //     //after the first reduction, the step should be 1.
                 //     curWordStep = 1;
+
 
                 //     leftTryTimes--;
                 // }
 
-                // // consider there is a part of a word at the end of this line, it should be moved to the next line
+
+                // //consider there is a part of a word at the end of this line, it should be moved to the next line
                 // if (curString.length >= 2) {
+
                 const lastWordExec = TmpUtils.getEnglishWordPartAtLast(curString);
                 //     if (lastWordExec && lastWordExec.length > 0
-                //         // to avoid endless loop when there is only one word in this line
+                //         //to avoid endless loop when there is only one word in this line
                 //         && curString !== lastWordExec[0]) {
                 //         curEnd -= lastWordExec[0].length;
                 //         curString = longStr.substring(curStart, curEnd);
+
                 if (lastWordExec && lastWordExec.length > 0) {
                     curWordStep = lastWordExec[0].length;
                 }
 
                 curString = longStr.substring(curStart, curEnd);
                 curStringSizeX = this._calculateSize(styleIndex, curString).x;
-                // // after the first reduction, the step should be 1.
+                // //after the first reduction, the step should be 1.
                 // curWordStep = 1;
+
 
                 leftTryTimes--;
             }
@@ -496,17 +523,21 @@ export default class TmpRichText extends Component {
             // curStart and curEnd can be float since they are like positions of pointer,
             // but step must be integer because we split the complete characters of which the unit is integer.
             // it is reasonable that using the length of this result to estimate the next result.
+
             partStringArr.push(curString);
             // const partStep = curString.length;
             // after putting the first element in array, we should reset sizeForThisPart
+
             sizeForThisPart = (lineCountForOnePart * this.maxWidth === 0 || lineCountForOnePart * this.maxWidth > 2048)
                 ? 2048 : (lineCountForOnePart * this.maxWidth);
 
             // estimate the next element length
             // precise calculation is in the next loop
+
             const nextStep = sizeForThisPart / this.fontSize;
             curStart = curEnd;
             // curEnd += partStep;
+
             curEnd += nextStep;
 
             curString = longStr.substring(curStart, curEnd);
@@ -514,24 +545,28 @@ export default class TmpRichText extends Component {
             leftString = longStr.substring(curEnd);
             // leftStringSize = this._calculateSize(styleIndex, leftString);
 
+
             leftTryTimes--;
 
             // Exit: If the left part string size is less than 2048, the method will finish.
             // if (leftStringSize.x < 2048) {
             // Exit1: If the current string is the last part of text and its size is less than 2048,
             // the leftString will be empty string, then we should exit
+
             if (!leftString
                 && curStringSizeX < 2048) {
                 curStart = text.length;
                 curEnd = text.length;
                 // curString = leftString;
                 // partStringArr.push(curString);
+
                 if (curString) {
                     partStringArr.push(curString);
                 }
                 break;
                 // } else {
                 //     curStringSize = this._calculateSize(styleIndex, curString);
+
             }
         }
 
@@ -606,6 +641,7 @@ export default class TmpRichText extends Component {
                     child.parent = null;
                 } else {
                     // In case child.parent !== this.node, child cannot be removed from children
+
                     children.splice(i, 1);
                 }
 
@@ -662,6 +698,7 @@ export default class TmpRichText extends Component {
 
         // set vertical alignments
         // because horizontal alignment is applied with line offsets in method "_updateRichTextPosition"
+
         const labelComp: TextMeshPro = labelSegment.comp as TextMeshPro;
         if (labelComp.verticalAlign !== this._verticalAlign) {
             labelComp.verticalAlign = this._verticalAlign;
@@ -684,6 +721,7 @@ export default class TmpRichText extends Component {
 
         if (this._lineOffsetX > 0 && fragmentWidth + this._lineOffsetX > this._maxWidth) {
             // concat previous line
+
             let checkStartIndex = 0;
             while (this._lineOffsetX <= this._maxWidth) {
                 const checkEndIndex = this._getFirstWordLen(labelString, checkStartIndex, labelString.length);
@@ -882,6 +920,7 @@ export default class TmpRichText extends Component {
             }
 
             // handle <br/> <img /> tag
+
             if (text === "") {
                 if (richTextElement.style && richTextElement.style.isNewLine) {
                     this._updateLineInfo();
@@ -902,6 +941,7 @@ export default class TmpRichText extends Component {
                 const labelString = multilineTexts[j];
                 if (labelString === "") {
                     // for continues \n
+
                     if (this._isLastComponentCR(text) && j === multilineTexts.length - 1) {
                         continue;
                     }
@@ -942,6 +982,7 @@ export default class TmpRichText extends Component {
         this._labelHeight = (this._lineCount + BASELINE_RATIO) * this._lineHeight;
 
         // trigger "size-changed" event
+
         this.node._uiProps.uiTransformComp!.setContentSize(this._labelWidth, this._labelHeight);
 
         this._updateRichTextPosition();
@@ -1003,7 +1044,8 @@ export default class TmpRichText extends Component {
 
             if (lineCount === nextLineIndex) {
                 nextTokenX += segment.node._uiProps.uiTransformComp!.width;
-                // 排版根据TextMeshPro字符信息适配
+                // Typesetting is adapted according to text mesh pro character information
+
                 let tmp: TextMeshPro = segment.node.getComponent(TextMeshPro);
                 if (tmp && tmp.richTextDeltaX) {
                     nextTokenX += tmp.richTextDeltaX;
@@ -1014,8 +1056,10 @@ export default class TmpRichText extends Component {
             if (sprite) {
                 const position = segment.node.position.clone();
                 // adjust img align (from <img align=top|center|bottom>)
+
                 const lineHeightSet = this._lineHeight;
                 const lineHeightReal = this._lineHeight * (1 + BASELINE_RATIO); // single line node height
+
                 switch (segment.node._uiProps.uiTransformComp!.anchorY) {
                     case 1:
                         position.y += (lineHeightSet + ((lineHeightReal - lineHeightSet) / 2));
@@ -1028,6 +1072,7 @@ export default class TmpRichText extends Component {
                         break;
                 }
                 // adjust img offset (from <img offset=12|12,34>)
+
                 if (segment.imageOffset) {
                     const offsets = segment.imageOffset.split(",");
                     if (offsets.length === 1 && offsets[0]) {
@@ -1043,18 +1088,19 @@ export default class TmpRichText extends Component {
                 segment.node.position = position;
             }
 
-            // // adjust y for label with outline
+            // adjust y for label with outline
             // const outline = segment.node.getComponent(LabelOutline);
             // if (outline) {
             //     const position = segment.node.position.clone();
             //     position.y -= outline.width;
             //     segment.node.position = position;
             // }
+
         }
     }
 
     /**
-     * 16进制颜色转换
+     * Hexadecimal color conversion
      * @param color 
      */
     private _convertLiteralColorValue(color: string): Color {
@@ -1077,7 +1123,7 @@ export default class TmpRichText extends Component {
     }
 
     /**
-     * 更新字体样式
+     * Update font styles
      */
     private _applyTextAttribute(labelSeg: ISegment): void {
         let labelComponent: TextMeshPro = labelSeg.node.getComponent(TextMeshPro);
@@ -1101,8 +1147,8 @@ export default class TmpRichText extends Component {
         labelComponent.setFont(this.font, this.textures);
         labelComponent.lineHeight = this.lineHeight;
 
-        labelComponent.colorGradient = Boolean(textStyle && textStyle.colorGradient);
-        if (labelComponent.colorGradient) {
+        labelComponent.vertexColorGradient = Boolean(textStyle && textStyle.colorGradient);
+        if (labelComponent.vertexColorGradient) {
             labelComponent.colorLB = this._convertLiteralColorValue(textStyle.colorGradient.lb);
             labelComponent.colorRB = this._convertLiteralColorValue(textStyle.colorGradient.rb);
             labelComponent.colorLT = this._convertLiteralColorValue(textStyle.colorGradient.lt);

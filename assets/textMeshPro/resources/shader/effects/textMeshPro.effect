@@ -46,6 +46,7 @@ CCEffect %{
         glowPower: { value: 1, range:[0, 1, 0.01] }
 }%
 
+#version 
 CCProgram tmp-vs %{
   precision highp float;
   #include <builtin/uniforms/cc-global>
@@ -100,6 +101,40 @@ CCProgram tmp-fs %{
   in vec2 uv0;
   in float texture_idx;
 
+  #if USE_LINEAR_GRADIENT_2
+    #define COLOR_IN_USE = 2  
+  #endif
+  #if USE_LINEAR_GRADIENT_3
+    #undef COLOR_IN_USE
+    #define COLOR_IN_USE = 3  
+  #endif
+  #if USE_LINEAR_GRADIENT_4
+    #undef COLOR_IN_USE
+    #define COLOR_IN_USE = 4  
+  #endif
+  #if USE_LINEAR_GRADIENT_5
+    #undef COLOR_IN_USE
+    #define COLOR_IN_USE = 5  
+  #endif
+
+  #ifdef COLOR_IN_USE 
+    uniform GradientColorItem1{
+        vec4 color1;
+        
+    };
+    uniform GradientColorItem2{
+        vec4 color2;
+        float colorRatio2;
+    };
+        
+    // #if COLOR_IN_USE == 3
+        uniform GradientColorItem3{
+            vec4 color3;
+            float colorRatio3;
+        };
+    // #endif
+  #endif
+  
   #if USE_TEXTURE_LEVEL_1
     uniform sampler2D texture0;
   #endif
@@ -118,48 +153,48 @@ CCProgram tmp-fs %{
   #endif
 
   uniform Face {
-    // 字体颜色，会与顶点颜色进行混合
+    //Font color will be mixed with vertex color
     vec4 faceColor;
-    // 字体的粗细 0.5为字体标准粗细
+    //The thickness of the font is 0.5. The standard thickness of the font
     float faceDilate;
-    // 字体的柔软度
+    //The softness of the font
     float faceSoftness;
   };
 
   #if USE_OUTLINE
     uniform Outline {
-      // 描边颜色，会受顶点alpha值影响
+      //The stroke color will be affected by the vertex alpha value
       vec4 outlineColor;
-      // 描边粗细
+      //Stroke thickness
       float outlineThickness;
     };
   #endif
 
   #if USE_UNDERLAY
     uniform Underlay {
-      // 阴影颜色，会受顶点alpha值影响
+      //Shadow color will be affected by the vertex alpha value
       vec4 underlayColor;
-      // 阴影偏移
+      //Shadow offset
       float underlayOffsetX;
       float underlayOffsetY;
-      // 阴影粗细
+      //Shadow thickness
       float underlayDilate;
-      // 阴影柔软度
+      //Shadow softness
       float underlaySoftness;
     };
   #endif
 
   #if USE_GLOW
     uniform Glow {
-      // 辉光颜色，会受顶点alpha值影响
+      //The glow color will be affected by the vertex alpha value
       vec4 glowColor;
-      // 辉光偏移
+      //Glow offset
       float glowOffset;
-      // 辉光向内部的粗细
+      //The thickness of the glow towards the interior
       float glowInner;
-      // 辉光向外部的粗细
+      //The thickness of the glow towards the outside
       float glowOuter;
-      // 辉光强度 值为1时辉光强度最大，值越小辉光衰减系数越大
+      //Glow intensity The glow intensity is the largest when the value is 1. The smaller the value, the greater the glow attenuation coefficient.
       float glowPower;
     };
   #endif
