@@ -8,6 +8,7 @@ import {
     gfx,
     HorizontalTextAlignment,
     JsonAsset,
+    log,
     Material,
     RenderData,
     renderer,
@@ -925,6 +926,7 @@ export default class TextMeshPro extends UIRenderer {
         const data = RenderData.add(vfmt);
         data.initRenderDrawInfo(this, drawInfoType);
         this._renderData = data;
+        console.log(data._batcher._staticVBBuffer._buffers);
         return data;
     }
 
@@ -1194,13 +1196,13 @@ export default class TextMeshPro extends UIRenderer {
 
         material.recompileShaders({
             USE_LINEAR_GRADIENT_2:
-                this.tmpUniform.linearGradientOptions.numberOfColors == 2,
+                this.tmpUniform.linearGradientOptions.numberOfColors >= 2,
             USE_LINEAR_GRADIENT_3:
-                this.tmpUniform.linearGradientOptions.numberOfColors == 3,
+                this.tmpUniform.linearGradientOptions.numberOfColors >= 3,
             USE_LINEAR_GRADIENT_4:
-                this.tmpUniform.linearGradientOptions.numberOfColors == 4,
+                this.tmpUniform.linearGradientOptions.numberOfColors >= 4,
             USE_LINEAR_GRADIENT_5:
-                this.tmpUniform.linearGradientOptions.numberOfColors == 5
+                this.tmpUniform.linearGradientOptions.numberOfColors >= 5
         });
         if (this.tmpUniform.linearGradientOptions.linearColorGradient) {
             this._updateTmpLinearGradientProps(material);
@@ -1219,7 +1221,7 @@ export default class TextMeshPro extends UIRenderer {
             );
             material.setProperty(
                 `gradientColorRatio${i + 1}`,
-                this.tmpUniform.linearGradientOptions.items[i].color
+                this.tmpUniform.linearGradientOptions.items[i].colorRatio
             );
         });
     }

@@ -1,0 +1,137 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        alphaThreshold: { value: 0.5 }
+        color1: { value: [1.0, 1.0, 1.0, 1.0], editor: {type: color} }
+        color2: { value: [1.0, 1.0, 1.0, 1.0], editor: {type: color} }
+        color3: { value: [1.0, 1.0, 1.0, 1.0], editor: {type: color} }
+        color4: { value: [1.0, 1.0, 1.0, 1.0], editor: {type: color} }
+        colorRadio1: { value: 0.20, editor: { 
+          range: [0.0, 1.0, 0.01] 
+        } }
+        colorRadio2: { value: 0.40, editor: { 
+          range: [0.0, 1.0, 0.01] 
+        } }
+        colorRadio3: { value: 0.60, editor: { 
+          range: [0.0, 1.0, 0.01] 
+        } }
+        startPoint: { value: 0.0, editor: { 
+          range: [0.0, 1.0, 0.01] 
+        } }
+
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+  #if SAMPLE_FROM_RT
+    #include <common/common-define>
+  #endif
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+
+  out vec4 color;
+  out vec2 uv0;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1);
+
+    #if USE_LOCAL
+      pos = cc_matWorld * pos;
+    #endif
+
+    #if USE_PIXEL_ALIGNMENT
+      pos = cc_matView * pos;
+      pos.xyz = floor(pos.xyz);
+      pos = cc_matProj * pos;
+    #else
+      pos = cc_matViewProj * pos;
+    #endif
+
+    uv0 = a_texCoord;
+    #if SAMPLE_FROM_RT
+      CC_HANDLE_RT_SAMPLE_FLIP(uv0);
+    #endif
+    color = a_color;
+
+    return pos;
+  }
+}%
+
+CCProgram sprite-fs %{
+  precision highp float;
+  #include <builtin/internal/embedded-alpha>
+  #include <builtin/internal/alpha-test>
+
+  in vec4 color;
+
+  uniform Constant {
+    vec4 color1;
+    vec4 color2;
+    vec4 color3;
+    vec4 color4;
+    float colorRadio1;
+    float colorRadio2;
+    float colorRadio3;
+    float startPoint;
+  };
+
+  in vec2 uv0;
+  #pragma builtin(local)
+  layout(set = 2, binding = 11) uniform sampler2D cc_spriteTexture;
+
+  vec4 frag () {
+    vec4 o = CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
+
+    // Корректировка gradientPosition с учетом startPoint
+    // float gradientPosition = uv0.y;
+    float gradientPosition =clamp((uv0.y - startPoint) / (1.0 - startPoint), 0.0, 1.0);
+
+    vec4 finalColor;
+
+    // Плавная интерполяция между цветами
+
+    #if MY_DEF
+      finalColor = mix(color1, color2, 0.5);
+    #endif
+    if (gradientPosition < colorRadio1) {
+      float t1 = clamp( gradientPosition/ colorRadio1, 0.0, 1.0);
+      finalColor = mix(color1, color2, t1);
+    } 
+    else if (gradientPosition < colorRadio2) {
+      float t2 = clamp((gradientPosition - colorRadio1) / (colorRadio2 - colorRadio1), 0.0, 1.0);
+      finalColor = mix(color2, color3, t2);
+    } 
+    else if (gradientPosition < colorRadio3) {
+      float t3 = clamp((gradientPosition - colorRadio2) / (colorRadio3 - colorRadio2), 0.0, 1.0);
+      finalColor = mix(color3, color4, t3);
+    } 
+    else {
+      finalColor = color4;
+    }
+
+    o.rgb *= finalColor.rgb;
+    o *= color;
+
+    ALPHA_TEST(o);
+    return o;
+  }
+}%

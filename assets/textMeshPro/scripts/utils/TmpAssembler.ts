@@ -1,4 +1,18 @@
-import { Color, HorizontalTextAlignment, log, Mat4, misc, Rect, rect, size, UITransform, v2, Vec2, Vec3, VerticalTextAlignment } from "cc";
+import {
+    Color,
+    HorizontalTextAlignment,
+    log,
+    Mat4,
+    misc,
+    Rect,
+    rect,
+    size,
+    UITransform,
+    v2,
+    Vec2,
+    Vec3,
+    VerticalTextAlignment
+} from "cc";
 import { JSB } from "cc/env";
 import TextMeshPro, { TmpOverflow } from "../TextMeshPro";
 import TmpFontConfig, { TmpFontLetter } from "./TmpFontConfig";
@@ -28,7 +42,7 @@ let shareLabelInfo = {
     vAlign: 0,
 
     hash: "",
-    margin: 0,
+    margin: 0
 };
 
 let _comp: TextMeshPro = null;
@@ -67,7 +81,9 @@ let QUAD_INDICES;
 /** 斜体计算向量 */
 let _italicVec = v2();
 /** 画下划线、删除线所需的数据 */
-let _extraLinesData: { [lineIndex: number]: { lineIndex: number, first: any, last: any } } = {};
+let _extraLinesData: {
+    [lineIndex: number]: { lineIndex: number; first: any; last: any };
+} = {};
 let _extraLineDef: TmpFontLetter = null;
 /** 省略号所需的数据 */
 let _ellipsisDef: TmpFontLetter = null;
@@ -155,9 +171,15 @@ export default class TmpAssembler {
      * 执行一次渲染数据更新
      */
     public static updateRenderData(comp: TextMeshPro): void {
-        if (!comp.renderData) { return; }
-        if (_comp === comp) { return; }
-        if (!comp.fontConfig) { return; }
+        if (!comp.renderData) {
+            return;
+        }
+        if (_comp === comp) {
+            return;
+        }
+        if (!comp.fontConfig) {
+            return;
+        }
 
         if (comp.renderData.vertDirty) {
             _comp = comp;
@@ -284,23 +306,32 @@ export default class TmpAssembler {
             _italicVec.y = _contentSize.height / 2;
             _italicVec = _italicVec.rotate(ITALIC_REDIANS);
             _contentSize.width += Math.abs(_italicVec.x) * 2;
-            _contentSize.height -= Math.abs(_contentSize.height / 2 - _italicVec.y) * 2;
+            _contentSize.height -=
+                Math.abs(_contentSize.height / 2 - _italicVec.y) * 2;
         }
         // 下划线、删除线
         if (comp.enableUnderline || comp.enableStrikethrough) {
-            _extraLineDef = shareLabelInfo.fontAtlas.getLetter(UNDERLINE_CODE + shareLabelInfo.hash);
+            _extraLineDef = shareLabelInfo.fontAtlas.getLetter(
+                UNDERLINE_CODE + shareLabelInfo.hash
+            );
             if (!_extraLineDef) {
                 log(`Can't find letter definition in textures. letter: _`);
             }
         }
         // 省略号
         if (comp.overflow === TmpOverflow.ELLIPSIS) {
-            _ellipsisDef = shareLabelInfo.fontAtlas.getLetter(ELLIPSIS_CODE + shareLabelInfo.hash);
+            _ellipsisDef = shareLabelInfo.fontAtlas.getLetter(
+                ELLIPSIS_CODE + shareLabelInfo.hash
+            );
             if (_ellipsisDef) {
-                _ellipsisWidth = (_ellipsisDef.xAdvance * _bmfontScale + _spacingX) * ELLIPSIS_NUM;
+                _ellipsisWidth =
+                    (_ellipsisDef.xAdvance * _bmfontScale + _spacingX) *
+                    ELLIPSIS_NUM;
             } else {
                 _ellipsisWidth = 0;
-                log(`Can't find letter definition in textures. letter: ${ELLIPSIS_CHAR}`);
+                log(
+                    `Can't find letter definition in textures. letter: ${ELLIPSIS_CHAR}`
+                );
             }
         }
     }
@@ -313,7 +344,7 @@ export default class TmpAssembler {
 
     private static _updateContent(): void {
         this._alignText();
-    }   
+    }
 
     private static _alignText(): void {
         _textDesiredHeight = 0;
@@ -332,7 +363,8 @@ export default class TmpAssembler {
             let scaleWidth = _bmfontScale;
             let needReset = false;
             if (_textDesiredHeight > _contentSize.height) {
-                scaleHeight = (_contentSize.height / _textDesiredHeight) * _bmfontScale;
+                scaleHeight =
+                    (_contentSize.height / _textDesiredHeight) * _bmfontScale;
                 needReset = true;
             }
 
@@ -380,7 +412,10 @@ export default class TmpAssembler {
         let ellipsisMaxLines = 0;
         let useEllipsis = false;
         if (_overflow === TmpOverflow.ELLIPSIS && _ellipsisDef) {
-            ellipsisMaxLines = Math.max(1, Math.floor(_contentSize.height / _lineHeight));
+            ellipsisMaxLines = Math.max(
+                1,
+                Math.floor(_contentSize.height / _lineHeight)
+            );
         }
 
         let textLen = _string.length;
@@ -396,17 +431,27 @@ export default class TmpAssembler {
         let letterDef: TmpFontLetter = null;
         let letterPosition = v2(0, 0);
 
-        for (let index = 0; index < textLen;) {
+        for (let index = 0; index < textLen; ) {
             let character = _string.charAt(index);
             if (character === "\n") {
                 // 省略号处理
-                if (_overflow === TmpOverflow.ELLIPSIS && _ellipsisDef && lineIndex + 1 >= ellipsisMaxLines) {
+                if (
+                    _overflow === TmpOverflow.ELLIPSIS &&
+                    _ellipsisDef &&
+                    lineIndex + 1 >= ellipsisMaxLines
+                ) {
                     this._recordEllipsis(nextTokenY, letterPosition, lineIndex);
                     useEllipsis = true;
                     // 更新_linesWidth
-                    let ellipsisInfo = _comp.lettersInfo[_comp.lettersInfo.length - 1];
+                    let ellipsisInfo =
+                        _comp.lettersInfo[_comp.lettersInfo.length - 1];
                     // letterRight = ellipsisInfo.x + (_ellipsisDef.w) * _bmfontScale - shareLabelInfo.margin;
-                    letterRight = ellipsisInfo.x + (_ellipsisDef.xAdvance - _ellipsisDef.offsetX) * _bmfontScale + _spacingX - shareLabelInfo.margin * 2;
+                    letterRight =
+                        ellipsisInfo.x +
+                        (_ellipsisDef.xAdvance - _ellipsisDef.offsetX) *
+                            _bmfontScale +
+                        _spacingX -
+                        shareLabelInfo.margin * 2;
                     break;
                 }
 
@@ -434,68 +479,111 @@ export default class TmpAssembler {
                     this._recordPlaceholderInfo(letterIndex, character);
                     continue;
                 }
-                letterDef = shareLabelInfo.fontAtlas.getLetterDefinitionForChar(character);
+                letterDef =
+                    shareLabelInfo.fontAtlas.getLetterDefinitionForChar(
+                        character
+                    );
                 if (!letterDef) {
                     this._recordPlaceholderInfo(letterIndex, character);
-                    log(`Can't find letter definition in textures. letter: ${character}`);
+                    log(
+                        `Can't find letter definition in textures. letter: ${character}`
+                    );
                     continue;
                 }
 
-                let letterX = nextLetterX + letterDef.offsetX * _bmfontScale - shareLabelInfo.margin;
+                let letterX =
+                    nextLetterX +
+                    letterDef.offsetX * _bmfontScale -
+                    shareLabelInfo.margin;
 
                 // 斜边处理
                 if ((_comp as TextMeshPro).enableItalic) {
                     _italicVec.x = 0;
-                    _italicVec.y = letterDef.h * _bmfontScale / 2;
+                    _italicVec.y = (letterDef.h * _bmfontScale) / 2;
                     _italicVec = _italicVec.rotate(ITALIC_REDIANS);
                     letterX += Math.abs(_italicVec.x);
                 }
 
                 // 省略号处理
                 if (_overflow === TmpOverflow.ELLIPSIS && _ellipsisDef) {
-                    if (letterX + (letterDef.xAdvance - letterDef.offsetX) * _bmfontScale > _maxLineWidth) {
+                    if (
+                        letterX +
+                            (letterDef.xAdvance - letterDef.offsetX) *
+                                _bmfontScale >
+                        _maxLineWidth
+                    ) {
                         if (!_isWrapText || lineIndex + 1 >= ellipsisMaxLines) {
-                            this._recordEllipsis(nextTokenY, letterPosition, lineIndex);
+                            this._recordEllipsis(
+                                nextTokenY,
+                                letterPosition,
+                                lineIndex
+                            );
                             useEllipsis = true;
                             // 更新_linesWidth
-                            let ellipsisInfo = _comp.lettersInfo[_comp.lettersInfo.length - 1];
+                            let ellipsisInfo =
+                                _comp.lettersInfo[_comp.lettersInfo.length - 1];
                             // letterRight = ellipsisInfo.x + (_ellipsisDef.w) * _bmfontScale - shareLabelInfo.margin;
-                            letterRight = ellipsisInfo.x + (_ellipsisDef.xAdvance - _ellipsisDef.offsetX) * _bmfontScale + _spacingX - shareLabelInfo.margin * 2;
+                            letterRight =
+                                ellipsisInfo.x +
+                                (_ellipsisDef.xAdvance - _ellipsisDef.offsetX) *
+                                    _bmfontScale +
+                                _spacingX -
+                                shareLabelInfo.margin * 2;
                             break;
                         }
                     }
                 }
 
-                if (_isWrapText
-                    && _maxLineWidth > 0
-                    && nextTokenX > 0
-                    && letterX + (letterDef.xAdvance - letterDef.offsetX) * _bmfontScale > _maxLineWidth
-                    && !TmpUtils.isUnicodeSpace(character)) {
+                if (
+                    _isWrapText &&
+                    _maxLineWidth > 0 &&
+                    nextTokenX > 0 &&
+                    letterX +
+                        (letterDef.xAdvance - letterDef.offsetX) *
+                            _bmfontScale >
+                        _maxLineWidth &&
+                    !TmpUtils.isUnicodeSpace(character)
+                ) {
                     _linesWidth.push(letterRight);
                     letterRight = 0;
                     lineIndex++;
                     nextTokenX = 0;
-                    nextTokenY -= (_lineHeight * this._getFontScale() + _lineSpacing);
+                    nextTokenY -=
+                        _lineHeight * this._getFontScale() + _lineSpacing;
                     newLine = true;
                     break;
                 } else {
                     letterPosition.x = letterX;
                 }
 
-                letterPosition.y = nextTokenY - letterDef.offsetY * _bmfontScale + shareLabelInfo.margin;
-                this._recordLetterInfo(letterPosition, character, letterIndex, lineIndex);
+                letterPosition.y =
+                    nextTokenY -
+                    letterDef.offsetY * _bmfontScale +
+                    shareLabelInfo.margin;
+                this._recordLetterInfo(
+                    letterPosition,
+                    character,
+                    letterIndex,
+                    lineIndex
+                );
 
-                if (letterIndex + 1 < _horizontalKernings.length && letterIndex < textLen - 1) {
+                if (
+                    letterIndex + 1 < _horizontalKernings.length &&
+                    letterIndex < textLen - 1
+                ) {
                     nextLetterX += _horizontalKernings[letterIndex + 1];
                 }
 
-                nextLetterX += letterDef.xAdvance * _bmfontScale + _spacingX - shareLabelInfo.margin * 2;
+                nextLetterX +=
+                    letterDef.xAdvance * _bmfontScale +
+                    _spacingX -
+                    shareLabelInfo.margin * 2;
 
                 tokenRight = nextLetterX; //letterPosition.x + letterDef.w * _bmfontScale - shareLabelInfo.margin;
                 // 斜边处理
                 if ((_comp as TextMeshPro).enableItalic) {
                     _italicVec.x = 0;
-                    _italicVec.y = letterDef.h * _bmfontScale / 2;
+                    _italicVec.y = (letterDef.h * _bmfontScale) / 2;
                     _italicVec = _italicVec.rotate(ITALIC_REDIANS);
                     tokenRight += Math.abs(_italicVec.x);
                 }
@@ -504,15 +592,22 @@ export default class TmpAssembler {
                     tokenHighestY = letterPosition.y;
                 }
 
-                if (tokenLowestY > letterPosition.y - letterDef.h * _bmfontScale) {
-                    tokenLowestY = letterPosition.y - letterDef.h * _bmfontScale;
+                if (
+                    tokenLowestY >
+                    letterPosition.y - letterDef.h * _bmfontScale
+                ) {
+                    tokenLowestY =
+                        letterPosition.y - letterDef.h * _bmfontScale;
                 }
-
             } //end of for loop
 
-            if (useEllipsis) { break; }
+            if (useEllipsis) {
+                break;
+            }
 
-            if (newLine) { continue; }
+            if (newLine) {
+                continue;
+            }
 
             nextTokenX = nextLetterX;
             letterRight = tokenRight;
@@ -533,7 +628,9 @@ export default class TmpAssembler {
         _linesWidth.push(letterRight);
 
         _numberOfLines = lineIndex + 1;
-        _textDesiredHeight = _numberOfLines * _lineHeight * this._getFontScale();0
+        _textDesiredHeight =
+            _numberOfLines * _lineHeight * this._getFontScale();
+        0;
         if (_numberOfLines > 1) {
             _textDesiredHeight += (_numberOfLines - 1) * _lineSpacing;
         }
@@ -541,10 +638,13 @@ export default class TmpAssembler {
         _contentSize.width = _labelWidth;
         _contentSize.height = _labelHeight;
         if (_labelWidth <= 0) {
-            _contentSize.width = parseFloat(longestLine.toFixed(2)) + shareLabelInfo.margin * 2;
+            _contentSize.width =
+                parseFloat(longestLine.toFixed(2)) + shareLabelInfo.margin * 2;
         }
         if (_labelHeight <= 0) {
-            _contentSize.height = parseFloat(_textDesiredHeight.toFixed(2)) + shareLabelInfo.margin * 2;
+            _contentSize.height =
+                parseFloat(_textDesiredHeight.toFixed(2)) +
+                shareLabelInfo.margin * 2;
         }
 
         _tailoredTopY = _contentSize.height;
@@ -574,16 +674,23 @@ export default class TmpAssembler {
         return _overflow === TmpOverflow.SHRINK ? _bmfontScale : 1;
     }
 
-    private static _getFirstWordLen(text: string, startIndex: number, textLen: number): number {
+    private static _getFirstWordLen(
+        text: string,
+        startIndex: number,
+        textLen: number
+    ): number {
         let character = text.charAt(startIndex);
-        if (TmpUtils.isUnicodeCJK(character)
-            || character === "\n"
-            || TmpUtils.isUnicodeSpace(character)) {
+        if (
+            TmpUtils.isUnicodeCJK(character) ||
+            character === "\n" ||
+            TmpUtils.isUnicodeSpace(character)
+        ) {
             return 1;
         }
 
         let len = 1;
-        let letterDef = shareLabelInfo.fontAtlas.getLetterDefinitionForChar(character);
+        let letterDef =
+            shareLabelInfo.fontAtlas.getLetterDefinitionForChar(character);
         if (!letterDef) {
             return len;
         }
@@ -592,21 +699,28 @@ export default class TmpAssembler {
         for (let index = startIndex + 1; index < textLen; ++index) {
             character = text.charAt(index);
 
-            letterDef = shareLabelInfo.fontAtlas.getLetterDefinitionForChar(character);
+            letterDef =
+                shareLabelInfo.fontAtlas.getLetterDefinitionForChar(character);
             if (!letterDef) {
                 break;
             }
             letterX = nextLetterX + letterDef.offsetX * _bmfontScale;
 
-            if (letterX + (letterDef.xAdvance - letterDef.offsetX) * _bmfontScale > _maxLineWidth
-                && !TmpUtils.isUnicodeSpace(character)
-                && _maxLineWidth > 0) {
+            if (
+                letterX +
+                    (letterDef.xAdvance - letterDef.offsetX) * _bmfontScale >
+                    _maxLineWidth &&
+                !TmpUtils.isUnicodeSpace(character) &&
+                _maxLineWidth > 0
+            ) {
                 return len;
             }
             nextLetterX += letterDef.xAdvance * _bmfontScale + _spacingX;
-            if (character === "\n"
-                || TmpUtils.isUnicodeSpace(character)
-                || TmpUtils.isUnicodeCJK(character)) {
+            if (
+                character === "\n" ||
+                TmpUtils.isUnicodeSpace(character) ||
+                TmpUtils.isUnicodeCJK(character)
+            ) {
                 break;
             }
             len++;
@@ -618,17 +732,28 @@ export default class TmpAssembler {
     /**
      * 从已记录的字符中倒退，直到能放下省略号
      */
-    private static _recordEllipsis(nextTokenY: number, letterPosition: Vec2, lineIndex: number): void {
+    private static _recordEllipsis(
+        nextTokenY: number,
+        letterPosition: Vec2,
+        lineIndex: number
+    ): void {
         let nextX = 0;
         let lastIndex = _comp.lettersInfo.length - 1;
         while (lastIndex >= 0) {
             let lastInfo = _comp.lettersInfo[lastIndex];
-            let lastDef = shareLabelInfo.fontAtlas.getLetterDefinitionForChar(lastInfo.char);
+            let lastDef = shareLabelInfo.fontAtlas.getLetterDefinitionForChar(
+                lastInfo.char
+            );
             let lastW = lastDef ? lastDef.w : 0;
             let lastXAdvance = lastDef ? lastDef.xAdvance : 0;
             let lastOffsetX = lastDef ? lastDef.offsetX : 0;
-            let lastRightX = lastInfo.x + lastW * _bmfontScale - shareLabelInfo.margin;
-            nextX = lastInfo.x + (lastXAdvance - lastOffsetX) * _bmfontScale + _spacingX - shareLabelInfo.margin * 2;
+            let lastRightX =
+                lastInfo.x + lastW * _bmfontScale - shareLabelInfo.margin;
+            nextX =
+                lastInfo.x +
+                (lastXAdvance - lastOffsetX) * _bmfontScale +
+                _spacingX -
+                shareLabelInfo.margin * 2;
             if (_maxLineWidth >= lastRightX + _ellipsisWidth) {
                 break;
             }
@@ -639,32 +764,55 @@ export default class TmpAssembler {
             nextX = 0;
         }
         // 记录省略号
-        letterPosition.y = nextTokenY - _ellipsisDef.offsetY * _bmfontScale + shareLabelInfo.margin;
+        letterPosition.y =
+            nextTokenY -
+            _ellipsisDef.offsetY * _bmfontScale +
+            shareLabelInfo.margin;
         for (let i = 1; i <= ELLIPSIS_NUM; i++) {
-            letterPosition.x = nextX + _ellipsisDef.offsetX * _bmfontScale - shareLabelInfo.margin;
-            this._recordLetterInfo(letterPosition, ELLIPSIS_CHAR, lastIndex + i, lineIndex);
-            nextX += _ellipsisDef.xAdvance * _bmfontScale + _spacingX - shareLabelInfo.margin * 2;
+            letterPosition.x =
+                nextX +
+                _ellipsisDef.offsetX * _bmfontScale -
+                shareLabelInfo.margin;
+            this._recordLetterInfo(
+                letterPosition,
+                ELLIPSIS_CHAR,
+                lastIndex + i,
+                lineIndex
+            );
+            nextX +=
+                _ellipsisDef.xAdvance * _bmfontScale +
+                _spacingX -
+                shareLabelInfo.margin * 2;
         }
     }
 
     /**
      * 记录无需渲染的占位符
      */
-    private static _recordPlaceholderInfo(letterIndex: number, char: string): void {
+    private static _recordPlaceholderInfo(
+        letterIndex: number,
+        char: string
+    ): void {
         if (letterIndex >= _comp.lettersInfo.length) {
             let tmpInfo = new TmpLetterInfo();
             _comp.lettersInfo.push(tmpInfo);
         }
 
         _comp.lettersInfo[letterIndex].char = char;
-        _comp.lettersInfo[letterIndex].hash = char.charCodeAt(0) + shareLabelInfo.hash;
+        _comp.lettersInfo[letterIndex].hash =
+            char.charCodeAt(0) + shareLabelInfo.hash;
         _comp.lettersInfo[letterIndex].valid = false;
     }
 
     /**
      * 记录需要渲染的字符
      */
-    private static _recordLetterInfo(letterPosition: Vec2, character: string, letterIndex: number, lineIndex: number): void {
+    private static _recordLetterInfo(
+        letterPosition: Vec2,
+        character: string,
+        letterIndex: number,
+        lineIndex: number
+    ): void {
         if (letterIndex >= _comp.lettersInfo.length) {
             let tmpInfo = new TmpLetterInfo();
             _comp.lettersInfo.push(tmpInfo);
@@ -675,7 +823,8 @@ export default class TmpAssembler {
         _comp.lettersInfo[letterIndex].line = lineIndex;
         _comp.lettersInfo[letterIndex].char = character;
         _comp.lettersInfo[letterIndex].hash = key;
-        _comp.lettersInfo[letterIndex].valid = shareLabelInfo.fontAtlas.getLetter(key).valid;
+        _comp.lettersInfo[letterIndex].valid =
+            shareLabelInfo.fontAtlas.getLetter(key).valid;
         _comp.lettersInfo[letterIndex].x = letterPosition.x;
         _comp.lettersInfo[letterIndex].y = letterPosition.y;
     }
@@ -691,7 +840,9 @@ export default class TmpAssembler {
                 break;
             case HorizontalTextAlignment.CENTER:
                 for (let i = 0, l = _linesWidth.length; i < l; i++) {
-                    _linesOffsetX.push((_contentSize.width - _linesWidth[i]) / 2);
+                    _linesOffsetX.push(
+                        (_contentSize.width - _linesWidth[i]) / 2
+                    );
                 }
                 break;
             case HorizontalTextAlignment.RIGHT:
@@ -706,7 +857,11 @@ export default class TmpAssembler {
         // TOP
         _letterOffsetY = _contentSize.height;
         if (_vAlign !== VerticalTextAlignment.TOP) {
-            let blank = _contentSize.height - _textDesiredHeight + _lineHeight * this._getFontScale() - _originFontSize * _bmfontScale;
+            let blank =
+                _contentSize.height -
+                _textDesiredHeight +
+                _lineHeight * this._getFontScale() -
+                _originFontSize * _bmfontScale;
             if (_vAlign === VerticalTextAlignment.BOTTOM) {
                 // BOTTOM
                 _letterOffsetY -= blank;
@@ -771,8 +926,14 @@ export default class TmpAssembler {
                         py = py - clipTop;
                     }
 
-                    if ((py - _tmpUvRect.height * _bmfontScale < _tailoredBottomY)) {
-                        _tmpUvRect.height = (py < _tailoredBottomY) ? 0 : (py - _tailoredBottomY) / _bmfontScale;
+                    if (
+                        py - _tmpUvRect.height * _bmfontScale <
+                        _tailoredBottomY
+                    ) {
+                        _tmpUvRect.height =
+                            py < _tailoredBottomY
+                                ? 0
+                                : (py - _tailoredBottomY) / _bmfontScale;
                     }
                 }
             }
@@ -785,8 +946,14 @@ export default class TmpAssembler {
                         _tmpUvRect.width -= -px / _bmfontScale;
                         px = 0;
                     }
-                    if (px + _tmpUvRect.width * _bmfontScale > _contentSize.width) {
-                        let clipRight = px + _tmpUvRect.width * _bmfontScale - _contentSize.width;
+                    if (
+                        px + _tmpUvRect.width * _bmfontScale >
+                        _contentSize.width
+                    ) {
+                        let clipRight =
+                            px +
+                            _tmpUvRect.width * _bmfontScale -
+                            _contentSize.width;
                         _tmpUvRect.width -= clipRight / _bmfontScale;
                     }
                 }
@@ -797,11 +964,20 @@ export default class TmpAssembler {
                 _tmpPosRect.y = py - appY;
                 _tmpPosRect.width = _tmpUvRect.width * _bmfontScale;
                 _tmpPosRect.height = _tmpUvRect.height * _bmfontScale;
-                this.appendQuad(_comp, letterDef.textureId, _tmpUvRect, _tmpPosRect);
+                this.appendQuad(
+                    _comp,
+                    letterDef.textureId,
+                    _tmpUvRect,
+                    _tmpPosRect
+                );
 
                 quadsIndex++;
                 // 下划线数据记录
-                if (_extraLineDef && ((_comp as TextMeshPro).enableUnderline || (_comp as TextMeshPro).enableStrikethrough)) {
+                if (
+                    _extraLineDef &&
+                    ((_comp as TextMeshPro).enableUnderline ||
+                        (_comp as TextMeshPro).enableStrikethrough)
+                ) {
                     if (!TmpUtils.isUnicodeSpace(letterInfo.char)) {
                         let lineData = _extraLinesData[letterInfo.line];
                         if (!lineData) {
@@ -809,7 +985,7 @@ export default class TmpAssembler {
                                 lineIndex: letterInfo.line,
                                 first: i,
                                 last: i
-                            }
+                            };
                         } else {
                             if (lineData.last < i) {
                                 lineData.last = i;
@@ -823,11 +999,22 @@ export default class TmpAssembler {
         if (_extraLineDef) {
             // 下划线
             if ((_comp as TextMeshPro).enableUnderline) {
-                this._updateLineQuads(appX, appY, -_fontSize + (_comp as TextMeshPro).underlineOffset * _bmfontScale);
+                this._updateLineQuads(
+                    appX,
+                    appY,
+                    -_fontSize +
+                        (_comp as TextMeshPro).underlineOffset * _bmfontScale
+                );
             }
             // 删除线
             if ((_comp as TextMeshPro).enableStrikethrough) {
-                this._updateLineQuads(appX, appY, -_fontSize / 2 + (_comp as TextMeshPro).strikethroughOffset * _bmfontScale);
+                this._updateLineQuads(
+                    appX,
+                    appY,
+                    -_fontSize / 2 +
+                        (_comp as TextMeshPro).strikethroughOffset *
+                            _bmfontScale
+                );
             }
         }
 
@@ -840,7 +1027,7 @@ export default class TmpAssembler {
 
     private static createQuadIndices(indexCount) {
         if (indexCount % 6 !== 0) {
-            console.error('illegal index count!');
+            console.error("illegal index count!");
             return;
         }
         const quadCount = indexCount / 6;
@@ -860,7 +1047,11 @@ export default class TmpAssembler {
     /**
      * 更新下划线、删除线的顶点数据
      */
-    private static _updateLineQuads(appx: number, appy: number, offsetY: number): void {
+    private static _updateLineQuads(
+        appx: number,
+        appy: number,
+        offsetY: number
+    ): void {
         for (let key in _extraLinesData) {
             let underlineInfo = _extraLinesData[key];
             let lineIdx = underlineInfo.lineIndex;
@@ -876,7 +1067,10 @@ export default class TmpAssembler {
 
             let maxWidth = lastInfo.x + lastDef.w * _bmfontScale - firstInfo.x;
 
-            let wLeft = maxWidth >= _extraLineDef.w * _bmfontScale ? _extraLineDef.w * _bmfontScale / 3 : maxWidth / 2;
+            let wLeft =
+                maxWidth >= _extraLineDef.w * _bmfontScale
+                    ? (_extraLineDef.w * _bmfontScale) / 3
+                    : maxWidth / 2;
             let wRight = wLeft;
             let wMid = maxWidth - wLeft - wRight;
             let leftX = firstInfo.x + _linesOffsetX[lineIdx];
@@ -889,7 +1083,11 @@ export default class TmpAssembler {
             _tmpUvRect.x = _extraLineDef.u;
             _tmpUvRect.y = _extraLineDef.v;
 
-            let py = firstInfo.y + _letterOffsetY + firstDef.offsetY * _bmfontScale + offsetY;
+            let py =
+                firstInfo.y +
+                _letterOffsetY +
+                firstDef.offsetY * _bmfontScale +
+                offsetY;
 
             if (_labelHeight > 0) {
                 if (py > _tailoredTopY) {
@@ -899,8 +1097,14 @@ export default class TmpAssembler {
                     py = py - clipTop;
                 }
 
-                if ((py - _extraLineDef.h * _bmfontScale < _tailoredBottomY) && _overflow === TmpOverflow.CLAMP) {
-                    _tmpUvRect.height = (py < _tailoredBottomY) ? 0 : (py - _tailoredBottomY) / _bmfontScale;
+                if (
+                    py - _extraLineDef.h * _bmfontScale < _tailoredBottomY &&
+                    _overflow === TmpOverflow.CLAMP
+                ) {
+                    _tmpUvRect.height =
+                        py < _tailoredBottomY
+                            ? 0
+                            : (py - _tailoredBottomY) / _bmfontScale;
                 }
             }
 
@@ -909,7 +1113,12 @@ export default class TmpAssembler {
                 _tmpPosRect.y = py - appy;
                 _tmpPosRect.width = wLeft;
                 _tmpPosRect.height = _tmpUvRect.height * _bmfontScale;
-                this.appendQuad(_comp, _extraLineDef.textureId, _tmpUvRect, _tmpPosRect);
+                this.appendQuad(
+                    _comp,
+                    _extraLineDef.textureId,
+                    _tmpUvRect,
+                    _tmpPosRect
+                );
             }
 
             // 右
@@ -921,12 +1130,17 @@ export default class TmpAssembler {
                 _tmpPosRect.y = py - appy;
                 _tmpPosRect.width = wRight;
                 _tmpPosRect.height = _tmpUvRect.height * _bmfontScale;
-                this.appendQuad(_comp, _extraLineDef.textureId, _tmpUvRect, _tmpPosRect);
+                this.appendQuad(
+                    _comp,
+                    _extraLineDef.textureId,
+                    _tmpUvRect,
+                    _tmpPosRect
+                );
             }
 
             // 中
             if (wMid > 0) {
-                _tmpUvRect.width = _extraLineDef.w - wLeft * 2 / _bmfontScale;
+                _tmpUvRect.width = _extraLineDef.w - (wLeft * 2) / _bmfontScale;
                 _tmpUvRect.x = _extraLineDef.u + _tmpUvRect.width;
 
                 if (_tmpUvRect.height > 0 && _tmpUvRect.width > 0) {
@@ -934,7 +1148,12 @@ export default class TmpAssembler {
                     _tmpPosRect.y = py - appy;
                     _tmpPosRect.width = wMid;
                     _tmpPosRect.height = _tmpUvRect.height * _bmfontScale;
-                    this.appendQuad(_comp, _extraLineDef.textureId, _tmpUvRect, _tmpPosRect);
+                    this.appendQuad(
+                        _comp,
+                        _extraLineDef.textureId,
+                        _tmpUvRect,
+                        _tmpPosRect
+                    );
                 }
             }
         }
@@ -947,7 +1166,12 @@ export default class TmpAssembler {
      * @param uvRect 顶点uv数据
      * @param posRect 顶点坐标数据
      */
-    private static appendQuad(comp: TextMeshPro, textureId: number, uvRect: Rect, posRect: Rect): void {
+    private static appendQuad(
+        comp: TextMeshPro,
+        textureId: number,
+        uvRect: Rect,
+        posRect: Rect
+    ): void {
         const renderData = comp.renderData;
         if (!renderData) {
             return;
@@ -956,7 +1180,10 @@ export default class TmpAssembler {
         // 此处会将renderData.chunk.vb置0
         const dataOffset = renderData.dataLength;
         renderData.dataLength += 4;
-        renderData.resize(renderData.dataLength, renderData.dataLength / 2 * 3);
+        renderData.resize(
+            renderData.dataLength,
+            (renderData.dataLength / 2) * 3
+        );
         const dataList = renderData.data;
 
         let texture = shareLabelInfo.fontAtlas.getTexture(textureId);
@@ -967,10 +1194,10 @@ export default class TmpAssembler {
 
         let l, b, r, t;
         // uvs
-        l = (uvRect.x) / texw;
+        l = uvRect.x / texw;
         r = (uvRect.x + rectWidth) / texw;
         b = (uvRect.y + rectHeight) / texh;
-        t = (uvRect.y) / texh;
+        t = uvRect.y / texh;
         dataList[dataOffset].u = l;
         dataList[dataOffset].v = b;
         dataList[dataOffset + 1].u = r;
@@ -998,7 +1225,15 @@ export default class TmpAssembler {
         }
     }
 
-    private static appendVerts(comp: TextMeshPro, dataList, dataOffset, l, r, b, t): void {
+    private static appendVerts(
+        comp: TextMeshPro,
+        dataList,
+        dataOffset,
+        l,
+        r,
+        b,
+        t
+    ): void {
         if (comp.enableItalic) {
             _italicVec.x = 0;
             _italicVec.y = (t - b) / 2;
@@ -1007,11 +1242,14 @@ export default class TmpAssembler {
             dataList[dataOffset].x = l - Math.abs(_italicVec.x);
             dataList[dataOffset].y = b + Math.abs((t - b) / 2 - _italicVec.y);
             dataList[dataOffset + 1].x = r - Math.abs(_italicVec.x);
-            dataList[dataOffset + 1].y = b + Math.abs((t - b) / 2 - _italicVec.y);
+            dataList[dataOffset + 1].y =
+                b + Math.abs((t - b) / 2 - _italicVec.y);
             dataList[dataOffset + 2].x = l + Math.abs(_italicVec.x);
-            dataList[dataOffset + 2].y = t - Math.abs((t - b) / 2 - _italicVec.y);
+            dataList[dataOffset + 2].y =
+                t - Math.abs((t - b) / 2 - _italicVec.y);
             dataList[dataOffset + 3].x = r + Math.abs(_italicVec.x);
-            dataList[dataOffset + 3].y = t - Math.abs((t - b) / 2 - _italicVec.y);
+            dataList[dataOffset + 3].y =
+                t - Math.abs((t - b) / 2 - _italicVec.y);
         } else {
             dataList[dataOffset].x = l;
             dataList[dataOffset].y = b;
@@ -1029,7 +1267,9 @@ export default class TmpAssembler {
      */
     public static updateColorExtra(comp: TextMeshPro): void {
         const dataList = comp.renderData.data;
-        if (!dataList || dataList.length <= 0) { return; }
+        if (!dataList || dataList.length <= 0) {
+            return;
+        }
 
         if (!JSB) {
             for (let i = 0; i < comp.lettersInfo.length; i++) {
@@ -1042,7 +1282,6 @@ export default class TmpAssembler {
                 if (dataList.length < offset + 4) {
                     break;
                 }
-                log(dataList[offset])
                 tempColor.set(WHITE);
                 tempColor.a *= alpha;
                 comp.vertexColorGradient && tempColor.multiply(comp.colorLB);
@@ -1070,7 +1309,10 @@ export default class TmpAssembler {
             let quadCount = vertexCount / 4;
             let letterIndex = 0;
             for (let i = 0; i < quadCount; i++) {
-                while (letterIndex < comp.lettersInfo.length && !comp.lettersInfo[letterIndex].valid) {
+                while (
+                    letterIndex < comp.lettersInfo.length &&
+                    !comp.lettersInfo[letterIndex].valid
+                ) {
                     letterIndex++;
                 }
                 if (letterIndex < comp.lettersInfo.length) {
@@ -1083,30 +1325,39 @@ export default class TmpAssembler {
 
                     tempColor.set(WHITE);
                     tempColor.a *= alpha;
-                    comp.vertexColorGradient && tempColor.multiply(comp.colorLB);
+                    comp.vertexColorGradient &&
+                        tempColor.multiply(comp.colorLB);
                     dataList[offset]["colorExtra"].set(tempColor);
 
                     tempColor.set(WHITE);
                     tempColor.a *= alpha;
-                    comp.vertexColorGradient && tempColor.multiply(comp.colorRB);
+                    comp.vertexColorGradient &&
+                        tempColor.multiply(comp.colorRB);
                     dataList[offset + 1]["colorExtra"].set(tempColor);
 
                     tempColor.set(WHITE);
                     tempColor.a *= alpha;
-                    comp.vertexColorGradient && tempColor.multiply(comp.colorLT);
+                    comp.vertexColorGradient &&
+                        tempColor.multiply(comp.colorLT);
                     dataList[offset + 2]["colorExtra"].set(tempColor);
 
                     tempColor.set(WHITE);
                     tempColor.a *= alpha;
-                    comp.vertexColorGradient && tempColor.multiply(comp.colorRT);
+                    comp.vertexColorGradient &&
+                        tempColor.multiply(comp.colorRT);
                     dataList[offset + 3]["colorExtra"].set(tempColor);
 
-                    let colorExtraOffset = offset * this.floatsPerVert + this.colorExtraOffset;
+                    let colorExtraOffset =
+                        offset * this.floatsPerVert + this.colorExtraOffset;
                     for (let i = 0; i < 4; i++) {
-                        const colorR = dataList[offset + i]["colorExtra"].r / 255;
-                        const colorG = dataList[offset + i]["colorExtra"].g / 255;
-                        const colorB = dataList[offset + i]["colorExtra"].b / 255;
-                        const colorA = dataList[offset + i]["colorExtra"].a / 255;
+                        const colorR =
+                            dataList[offset + i]["colorExtra"].r / 255;
+                        const colorG =
+                            dataList[offset + i]["colorExtra"].g / 255;
+                        const colorB =
+                            dataList[offset + i]["colorExtra"].b / 255;
+                        const colorA =
+                            dataList[offset + i]["colorExtra"].a / 255;
                         vData[colorExtraOffset] = colorR;
                         vData[colorExtraOffset + 1] = colorG;
                         vData[colorExtraOffset + 2] = colorB;
@@ -1114,7 +1365,8 @@ export default class TmpAssembler {
                         colorExtraOffset += this.floatsPerVert;
                     }
                 } else {
-                    let colorExtraOffset = i * 4 * this.floatsPerVert + this.colorExtraOffset;
+                    let colorExtraOffset =
+                        i * 4 * this.floatsPerVert + this.colorExtraOffset;
                     for (let i = 0; i < 4; i++) {
                         vData[colorExtraOffset] = 1;
                         vData[colorExtraOffset + 1] = 1;
@@ -1134,24 +1386,40 @@ export default class TmpAssembler {
      */
     public static isVisble(comp: TextMeshPro, index: number): boolean {
         let info = comp.lettersInfo[index];
-        return info && info.valid && info.visible && !TmpUtils.isUnicodeSpace(info.char);
+        return (
+            info &&
+            info.valid &&
+            info.visible &&
+            !TmpUtils.isUnicodeSpace(info.char)
+        );
     }
 
     /**
      * 根据字符下标设置字符是否可见
      */
-    public static setVisible(comp: TextMeshPro, index: number, visible: boolean): void {
+    public static setVisible(
+        comp: TextMeshPro,
+        index: number,
+        visible: boolean
+    ): void {
         let info = comp.lettersInfo[index];
-        if (!info || this.isVisble(comp, index) === visible || info.visible === visible || TmpUtils.isUnicodeSpace(info.char)) {
+        if (
+            !info ||
+            this.isVisble(comp, index) === visible ||
+            info.visible === visible ||
+            TmpUtils.isUnicodeSpace(info.char)
+        ) {
             return;
         }
 
         let offset = info.quadsIndex * 4;
         const dataList = comp.renderData.data;
-        if (!dataList || dataList.length < offset + 4) { return; }
+        if (!dataList || dataList.length < offset + 4) {
+            return;
+        }
 
         info.visible = visible;
-        let alpha = (visible ? 1 : 0);
+        let alpha = visible ? 1 : 0;
 
         tempColor.set(WHITE);
         tempColor.a *= alpha;
@@ -1175,7 +1443,8 @@ export default class TmpAssembler {
 
         if (JSB) {
             const vData = comp.renderData.chunk.vb;
-            let colorExtraOffset = offset * this.floatsPerVert + this.colorExtraOffset;
+            let colorExtraOffset =
+                offset * this.floatsPerVert + this.colorExtraOffset;
             for (let i = 0; i < 4; i++) {
                 const colorR = dataList[offset + i]["colorExtra"].r / 255;
                 const colorG = dataList[offset + i]["colorExtra"].g / 255;
@@ -1193,7 +1462,10 @@ export default class TmpAssembler {
     /**
      * 根据字符下标获取颜色顶点数据，顺序为[左下, 右下, 左上, 右上]
      */
-    public static getColorExtraVertices(comp: TextMeshPro, index: number): [Color, Color, Color, Color] | null {
+    public static getColorExtraVertices(
+        comp: TextMeshPro,
+        index: number
+    ): [Color, Color, Color, Color] | null {
         let info = comp.lettersInfo[index];
         if (!info || !info.valid) {
             return null;
@@ -1201,7 +1473,9 @@ export default class TmpAssembler {
 
         let offset = info.quadsIndex * 4;
         const dataList = comp.renderData.data;
-        if (!dataList || dataList.length < offset + 4) { return; }
+        if (!dataList || dataList.length < offset + 4) {
+            return;
+        }
 
         let result: [Color, Color, Color, Color] = [] as any;
         for (let i = 0; i < 4; i++) {
@@ -1214,15 +1488,26 @@ export default class TmpAssembler {
     /**
      * 根据字符下标设置颜色顶点数据，顺序为[左下, 右下, 左上, 右上]
      */
-    public static setColorExtraVertices(comp: TextMeshPro, index: number, data: [Color, Color, Color, Color]): void {
+    public static setColorExtraVertices(
+        comp: TextMeshPro,
+        index: number,
+        data: [Color, Color, Color, Color]
+    ): void {
         let info = comp.lettersInfo[index];
-        if (!info || !info.valid || data.length !== 4 || TmpUtils.isUnicodeSpace(info.char)) {
+        if (
+            !info ||
+            !info.valid ||
+            data.length !== 4 ||
+            TmpUtils.isUnicodeSpace(info.char)
+        ) {
             return;
         }
 
         let offset = info.quadsIndex * 4;
         const dataList = comp.renderData.data;
-        if (!dataList || dataList.length < offset + 4) { return; }
+        if (!dataList || dataList.length < offset + 4) {
+            return;
+        }
 
         for (let i = 0; i < 4; i++) {
             dataList[offset + i]["colorExtra"].set(data[i]);
@@ -1230,7 +1515,8 @@ export default class TmpAssembler {
 
         if (JSB) {
             const vData = comp.renderData.chunk.vb;
-            let colorExtraOffset = offset * this.floatsPerVert + this.colorExtraOffset;
+            let colorExtraOffset =
+                offset * this.floatsPerVert + this.colorExtraOffset;
             for (let i = 0; i < 4; i++) {
                 const colorR = dataList[offset + i]["colorExtra"].r / 255;
                 const colorG = dataList[offset + i]["colorExtra"].g / 255;
@@ -1248,7 +1534,10 @@ export default class TmpAssembler {
     /**
      * 根据字符下标获取坐标顶点数据，顺序为[左下, 右下, 左上, 右上]
      */
-    public static getPosVertices(comp: TextMeshPro, index: number): [Vec3, Vec3, Vec3, Vec3] | null {
+    public static getPosVertices(
+        comp: TextMeshPro,
+        index: number
+    ): [Vec3, Vec3, Vec3, Vec3] | null {
         let info = comp.lettersInfo[index];
         if (!info || !info.valid) {
             return null;
@@ -1256,11 +1545,19 @@ export default class TmpAssembler {
 
         let offset = info.quadsIndex * 4;
         const dataList = comp.renderData.data;
-        if (!dataList || dataList.length < offset + 4) { return; }
+        if (!dataList || dataList.length < offset + 4) {
+            return;
+        }
 
         let result: [Vec3, Vec3, Vec3, Vec3] = [] as any;
         for (let i = 0; i < 4; i++) {
-            result.push(new Vec3(dataList[offset + i].x, dataList[offset + i].y, dataList[offset + i].z));
+            result.push(
+                new Vec3(
+                    dataList[offset + i].x,
+                    dataList[offset + i].y,
+                    dataList[offset + i].z
+                )
+            );
         }
         return result;
     }
@@ -1268,15 +1565,26 @@ export default class TmpAssembler {
     /**
      * 根据字符下标设置坐标顶点数据，顺序为[左下, 右下, 左上, 右上]
      */
-    public static setPosVertices(comp: TextMeshPro, index: number, data: [Vec3, Vec3, Vec3, Vec3]): void {
+    public static setPosVertices(
+        comp: TextMeshPro,
+        index: number,
+        data: [Vec3, Vec3, Vec3, Vec3]
+    ): void {
         let info = comp.lettersInfo[index];
-        if (!info || !info.valid || data.length !== 4 || TmpUtils.isUnicodeSpace(info.char)) {
+        if (
+            !info ||
+            !info.valid ||
+            data.length !== 4 ||
+            TmpUtils.isUnicodeSpace(info.char)
+        ) {
             return;
         }
 
         let offset = info.quadsIndex * 4;
         const dataList = comp.renderData.data;
-        if (!dataList || dataList.length < offset + 4) { return; }
+        if (!dataList || dataList.length < offset + 4) {
+            return;
+        }
 
         for (let i = 0; i < 4; i++) {
             dataList[offset + i].x = data[i].x;
@@ -1286,7 +1594,9 @@ export default class TmpAssembler {
 
         if (JSB) {
             comp.renderData.renderDrawInfo.nativeObj["vertDirty"] = true;
-            comp.renderData.renderDrawInfo.fillRender2dBuffer(comp.renderData.data);
+            comp.renderData.renderDrawInfo.fillRender2dBuffer(
+                comp.renderData.data
+            );
         }
     }
 

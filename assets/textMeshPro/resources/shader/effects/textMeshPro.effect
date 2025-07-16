@@ -16,7 +16,7 @@ CCEffect %{
         cullMode: none
       properties:
         alphaThreshold: { value: 0.5 }
-
+        
         texture0: { value: white }
         texture1: { value: white }
         texture2: { value: white }
@@ -25,6 +25,18 @@ CCEffect %{
         texture5: { value: white }
         texture6: { value: white }
         texture7: { value: white }
+        
+        gradientColor1: { value: [1, 1, 1, 1],  editor: { type: color } }
+        gradientColor2: { value: [1, 1, 1, 1],  editor: { type: color } }
+        gradientColor3: { value: [1, 1, 1, 1],  editor: { type: color } }
+        gradientColor4: { value: [1, 1, 1, 1],  editor: { type: color } }
+        gradientColor5: { value: [1, 1, 1, 1],  editor: { type: color } }
+        gradientColorRatio1: { value: 0.5, range:[0, 1, 0.01] }
+        gradientColorRatio2: { value: 0.5, range:[0, 1, 0.01] }
+        gradientColorRatio3: { value: 0.5, range:[0, 1, 0.01] }
+        gradientColorRatio4: { value: 0.5, range:[0, 1, 0.01] }
+        gradientColorRatio5: { value: 0.5, range:[0, 1, 0.01] }
+        gradientAngle: { value: 0.5, range:[0, 1, 0.01] }
 
         faceColor: { value: [1, 1, 1, 1],  editor: { type: color } }
         faceDilate: { value: 0.5, range:[0, 1, 0.01] }
@@ -39,13 +51,13 @@ CCEffect %{
         underlayDilate: { value: 0.5, range:[0, 1, 0.01] }
         underlaySoftness: { value: 0.1, range:[0, 1, 0.01] }
 
-        glowColor: { value: [0, 1, 0, 1],  editor: { type: color } }
+        # glowColor123: { value: [0, 1] }
+        glowColor: { value: [0, 1, 0, 1] }
         glowOffset: { value: 0.5, range:[0, 1, 0.01] }
         glowInner: { value: 0.01, range:[0, 1, 0.01] }
         glowOuter: { value: 0.01, range:[0, 1, 0.01] }
         glowPower: { value: 1, range:[0, 1, 0.01] }
 }%
-
 #version 
 CCProgram tmp-vs %{
   precision highp float;
@@ -99,41 +111,37 @@ CCProgram tmp-fs %{
 
   in vec4 color;
   in vec2 uv0;
+  in vec3 pos;
   in float texture_idx;
 
-  #if USE_LINEAR_GRADIENT_2
-    #define COLOR_IN_USE = 2  
-  #endif
-  #if USE_LINEAR_GRADIENT_3
-    #undef COLOR_IN_USE
-    #define COLOR_IN_USE = 3  
-  #endif
-  #if USE_LINEAR_GRADIENT_4
-    #undef COLOR_IN_USE
-    #define COLOR_IN_USE = 4  
-  #endif
-  #if USE_LINEAR_GRADIENT_5
-    #undef COLOR_IN_USE
-    #define COLOR_IN_USE = 5  
-  #endif
-
-  #ifdef COLOR_IN_USE 
-    uniform GradientColorItem1{
-        vec4 color1;
-        
-    };
-    uniform GradientColorItem2{
-        vec4 color2;
-        float colorRatio2;
-    };
-        
-    // #if COLOR_IN_USE == 3
-        uniform GradientColorItem3{
-            vec4 color3;
-            float colorRatio3;
+    #if USE_LINEAR_GRADIENT_2 //|| USE_LINEAR_GRADIENT_3 || USE_LINEAR_GRADIENT_4 || USE_LINEAR_GRADIENT_5
+        uniform GradientColorItem2{
+            float gradientColorRatio1;
+            float gradientColorRatio2;
+            float gradientAngle;
+            float padding;
+            vec4 gradientColor1;
+            vec4 gradientColor2;
         };
-    // #endif
-  #endif
+    #endif
+    #if USE_LINEAR_GRADIENT_3 //|| USE_LINEAR_GRADIENT_4 || USE_LINEAR_GRADIENT_5
+        uniform GradientColorItem3{
+            vec4 gradientColor3;
+            float gradientColorRatio3;
+        };
+    #endif
+    #if USE_LINEAR_GRADIENT_4 //|| USE_LINEAR_GRADIENT_5
+        uniform GradientColorItem4{
+            vec4 gradientColor4;
+            float gradientColorRatio4;
+        };
+    #endif
+    #if USE_LINEAR_GRADIENT_5
+        uniform GradientColorItem5{
+            vec4 gradientColor5;
+            float gradientColorRatio5;
+        };
+    #endif
   
   #if USE_TEXTURE_LEVEL_1
     uniform sampler2D texture0;
@@ -262,7 +270,45 @@ CCProgram tmp-fs %{
     float faceValue = 1.0 - faceDilate;
     float faceDistance = smoothstep(faceValue - faceSoftness, faceValue + faceSoftness, curDistance);
     vec4 fragColor = vec4(color.rgb * faceColor.rgb, faceColor.a * faceDistance);
-
+    
+    // #if USE_LINEAR_GRADIENT_2 
+    float gradientPosition =clamp((uv0.y) / (1.0), 0.0, 1.0);
+    vec4 grad = mix(vec4(1,0,0,255),vec4(0,0,255,255),uv0.y);
+    fragColor.rgb = grad.rgb;
+    vec4 lastColor;
+    // #endif
+    // if (gradientPosition > gradientColorRatio2) {
+    //   float t1 = clamp( gradientPosition/ gradientColorRatio2, 0.0, 1.0);
+    //   fragColor = mix(gradientColor1, gradientColor2, t1);
+    //   lastColor = gradientColor2;
+    // } 
+    // #endif
+    // #if USE_LINEAR_GRADIENT_3 
+    // else if (gradientPosition > gradientColorRatio3 ) {
+    //   float t2 = clamp((gradientPosition - gradientColorRatio2) / (gradientColorRatio3 - gradientColorRatio2), 0.0, 1.0);
+    //   fragColor = mix(gradientColor2, gradientColor3, t2);
+    //   lastColor = gradientColor3;
+    // } 
+    // #endif
+    // #if USE_LINEAR_GRADIENT_4 
+    // else if (gradientPosition >gradientColorRatio4) {
+    //   float t3 = clamp((gradientPosition - gradientColorRatio3) / (gradientColorRatio4 - gradientColorRatio3), 0.0, 1.0);
+    //   fragColor = mix(gradientColor3, gradientColor4, t3);
+    //   lastColor = gradientColor4;
+    // } 
+    // #endif
+    // #if USE_LINEAR_GRADIENT_5 
+    // else if (gradientPosition > gradientColorRatio5) {
+    //   float t4 = clamp((gradientPosition - gradientColorRatio4) / (gradientColorRatio5 - gradientColorRatio4), 0.0, 1.0);
+    //   fragColor = mix(gradientColor4, gradientColor5, t4);
+    //   lastColor = gradientColor5;
+    // } 
+    // #endif
+    // #if USE_LINEAR_GRADIENT_2 
+    // else {
+    //   fragColor = lastColor;
+    // }
+    // #endif
     #if USE_OUTLINE
       float outEdge1 = faceValue - outlineThickness;
       float outEdge2 = faceValue;
@@ -291,7 +337,7 @@ CCProgram tmp-fs %{
       fragColor += glowColor * glowColor.a * alpha;
     #endif
 
-    fragColor.a *= color.a;
+    // fragColor.a *= color.a;
 
     ALPHA_TEST(fragColor);
     return fragColor;

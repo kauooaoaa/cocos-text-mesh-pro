@@ -77,6 +77,9 @@ export class LinearGradientOptions {
             )
         );
     }
+    get angleRadian() {
+        return Vec3.angle(Vec3.RIGHT, this._direction);
+    }
 
     get numberOfColors() {
         return this._items.length;
