@@ -1,7 +1,34 @@
-import { assert, CCObject, Color, Component, EventTouch, HorizontalTextAlignment, isValid, js, JsonAsset, Material, Node, NodeEventType, Sprite, SpriteAtlas, SpriteFrame, Texture2D, UITransform, v2, Vec2, VerticalTextAlignment, warnID, _decorator } from "cc";
+import {
+    assert,
+    CCObject,
+    Color,
+    Component,
+    EventTouch,
+    HorizontalTextAlignment,
+    isValid,
+    js,
+    JsonAsset,
+    Material,
+    Node,
+    NodeEventType,
+    Sprite,
+    SpriteAtlas,
+    SpriteFrame,
+    Texture2D,
+    UITransform,
+    v2,
+    Vec2,
+    VerticalTextAlignment,
+    warnID,
+    _decorator
+} from "cc";
 import { DEV, EDITOR } from "cc/env";
 import TextMeshPro from "./TextMeshPro";
-import { HtmlTextParser, IHtmlTextParserResultObj, IHtmlTextParserStack } from "./utils/HtmlParser";
+import {
+    HtmlTextParser,
+    IHtmlTextParserResultObj,
+    IHtmlTextParserStack
+} from "./utils/HtmlParser";
 import TmpUtils from "./utils/TmpUtils";
 
 const { ccclass, property, disallowMultiple, executeInEditMode } = _decorator;
@@ -20,7 +47,7 @@ interface ISegment {
     imageOffset: string;
     clickParam: string;
     clickHandler: string;
-    type: string,
+    type: string;
 }
 
 /**
@@ -28,7 +55,7 @@ interface ISegment {
  */
 const labelPool: any = new js.Pool((seg: ISegment) => {
     if (DEV) {
-        assert(!seg.node.parent, "Recycling node\'s parent should be null!");
+        assert(!seg.node.parent, "Recycling node's parent should be null!");
     }
     if (!isValid(seg.node)) {
         return false;
@@ -38,7 +65,7 @@ const labelPool: any = new js.Pool((seg: ISegment) => {
 
 const imagePool: any = new js.Pool((seg: ISegment) => {
     if (DEV) {
-        assert(!seg.node.parent, "Recycling node\'s parent should be null!");
+        assert(!seg.node.parent, "Recycling node's parent should be null!");
     }
     return isValid(seg.node) as boolean;
 }, 10);
@@ -52,11 +79,15 @@ function createSegment(type: string): ISegment {
         imageOffset: "",
         clickParam: "",
         clickHandler: "",
-        type,
+        type
     };
 }
 
-function getSegmentByPool(type: string, content: string | SpriteFrame, mat?: Material) {
+function getSegmentByPool(
+    type: string,
+    content: string | SpriteFrame,
+    mat?: Material
+) {
     let seg;
     if (type === RichTextChildName) {
         seg = labelPool["_get"]();
@@ -74,9 +105,11 @@ function getSegmentByPool(type: string, content: string | SpriteFrame, mat?: Mat
         seg.comp.spriteFrame = content as SpriteFrame;
         seg.comp.type = Sprite.Type.SLICED;
         seg.comp.sizeMode = Sprite.SizeMode.CUSTOM;
-    } else { // Rich text child name
+    } else {
+        // Rich text child name
 
-        seg.comp = node.getComponent(TextMeshPro) || node.addComponent(TextMeshPro);
+        seg.comp =
+            node.getComponent(TextMeshPro) || node.addComponent(TextMeshPro);
         if (mat) {
             seg.comp.customMaterial = mat;
         }
@@ -105,13 +138,16 @@ function getSegmentByPool(type: string, content: string | SpriteFrame, mat?: Mat
 @disallowMultiple
 @executeInEditMode
 export default class TmpRichText extends Component {
-
     @property
     private _string: string = "";
     @property({ multiline: true })
-    public get string(): string { return this._string; }
+    public get string(): string {
+        return this._string;
+    }
     public set string(v: string) {
-        if (this._string === v) { return; }
+        if (this._string === v) {
+            return;
+        }
         this._string = v;
         // this._layoutDirty = true;
 
@@ -120,10 +156,19 @@ export default class TmpRichText extends Component {
 
     @property(JsonAsset)
     private _font: JsonAsset = null;
-    @property({ tooltip: DEV && "字体资源\n依赖的纹理请勿打入图集\n在编辑器内拖拽此文件时，纹理必须和此文件处于同一目录下", type: JsonAsset })
-    private get font(): JsonAsset { return this._font; }
+    @property({
+        tooltip:
+            DEV &&
+            "字体资源\n依赖的纹理请勿打入图集\n在编辑器内拖拽此文件时，纹理必须和此文件处于同一目录下",
+        type: JsonAsset
+    })
+    private get font(): JsonAsset {
+        return this._font;
+    }
     private set font(v: JsonAsset) {
-        if (this._font === v) { return; }
+        if (this._font === v) {
+            return;
+        }
         this._font = v;
         if (EDITOR) {
             this.editorInit();
@@ -134,11 +179,16 @@ export default class TmpRichText extends Component {
     }
 
     @property({ type: HorizontalTextAlignment })
-    private _horizontalAlign: HorizontalTextAlignment = HorizontalTextAlignment.LEFT;
+    private _horizontalAlign: HorizontalTextAlignment =
+        HorizontalTextAlignment.LEFT;
     @property({ type: HorizontalTextAlignment })
-    public get horizontalAlign(): HorizontalTextAlignment { return this._horizontalAlign; }
+    public get horizontalAlign(): HorizontalTextAlignment {
+        return this._horizontalAlign;
+    }
     public set horizontalAlign(v: HorizontalTextAlignment) {
-        if (this._horizontalAlign === v) { return; }
+        if (this._horizontalAlign === v) {
+            return;
+        }
         this._horizontalAlign = v;
         this._layoutDirty = true;
         this._updateRichText();
@@ -147,9 +197,13 @@ export default class TmpRichText extends Component {
     @property({ type: VerticalTextAlignment })
     private _verticalAlign: VerticalTextAlignment = VerticalTextAlignment.TOP;
     @property({ type: VerticalTextAlignment })
-    public get verticalAlign(): VerticalTextAlignment { return this._verticalAlign; }
+    public get verticalAlign(): VerticalTextAlignment {
+        return this._verticalAlign;
+    }
     public set verticalAlign(v: VerticalTextAlignment) {
-        if (this._verticalAlign === v) { return; }
+        if (this._verticalAlign === v) {
+            return;
+        }
         this._verticalAlign = v;
         this._layoutDirty = true;
         this._updateRichText();
@@ -158,9 +212,13 @@ export default class TmpRichText extends Component {
     @property
     private _fontSize: number = 32;
     @property({ range: [0, 1024] })
-    public get fontSize(): number { return this._fontSize; }
+    public get fontSize(): number {
+        return this._fontSize;
+    }
     public set fontSize(v: number) {
-        if (this._fontSize === v) { return; }
+        if (this._fontSize === v) {
+            return;
+        }
         this._fontSize = v;
         this._layoutDirty = true;
         this._updateRichText();
@@ -169,9 +227,13 @@ export default class TmpRichText extends Component {
     @property
     private _maxWidth: number = 0;
     @property({ tooltip: DEV && "富文本的最大宽度" })
-    public get maxWidth(): number { return this._maxWidth; }
+    public get maxWidth(): number {
+        return this._maxWidth;
+    }
     public set maxWidth(v: number) {
-        if (this._maxWidth === v) { return; }
+        if (this._maxWidth === v) {
+            return;
+        }
         this._maxWidth = v;
         this._layoutDirty = true;
         this._updateRichText();
@@ -180,9 +242,13 @@ export default class TmpRichText extends Component {
     @property
     private _lineHeight: number = 32;
     @property
-    public get lineHeight(): number { return this._lineHeight; }
+    public get lineHeight(): number {
+        return this._lineHeight;
+    }
     public set lineHeight(v: number) {
-        if (this._lineHeight === v) { return; }
+        if (this._lineHeight === v) {
+            return;
+        }
         this._lineHeight = v;
         this._layoutDirty = true;
         this._updateRichText();
@@ -191,9 +257,13 @@ export default class TmpRichText extends Component {
     @property(SpriteAtlas)
     private _imageAtlas: SpriteAtlas = null;
     @property(SpriteAtlas)
-    public get imageAtlas(): SpriteAtlas { return this._imageAtlas; }
+    public get imageAtlas(): SpriteAtlas {
+        return this._imageAtlas;
+    }
     public set imageAtlas(v: SpriteAtlas) {
-        if (this._imageAtlas === v) { return; }
+        if (this._imageAtlas === v) {
+            return;
+        }
         this._imageAtlas = v;
         this._layoutDirty = true;
         this._updateRichText();
@@ -202,19 +272,29 @@ export default class TmpRichText extends Component {
     @property
     private _handleTouchEvent: boolean = true;
     @property
-    public get handleTouchEvent(): boolean { return this._handleTouchEvent; }
+    public get handleTouchEvent(): boolean {
+        return this._handleTouchEvent;
+    }
     public set handleTouchEvent(v: boolean) {
-        if (this._handleTouchEvent === v) { return; }
+        if (this._handleTouchEvent === v) {
+            return;
+        }
         this._handleTouchEvent = v;
         if (this.enabledInHierarchy) {
-            this.handleTouchEvent ? this._addEventListeners() : this._removeEventListeners();
+            this.handleTouchEvent
+                ? this._addEventListeners()
+                : this._removeEventListeners();
         }
     }
 
     @property(Material)
     public material: Material = null;
 
-    @property({ tooltip: DEV && "字体所依赖的纹理", type: Texture2D, readonly: true })
+    @property({
+        tooltip: DEV && "字体所依赖的纹理",
+        type: Texture2D,
+        readonly: true
+    })
     public textures: Texture2D[] = [];
 
     private _textArray: IHtmlTextParserResultObj[] = [];
@@ -234,9 +314,14 @@ export default class TmpRichText extends Component {
     private get labelContent(): Node {
         if (!this._labelContent) {
             const content = "TMP_LABEL_CONTENT";
-            this._labelContent = this.node.getChildByName(content) ?? new Node(content);
-            this._labelContent.hideFlags |= CCObject.Flags.DontSave | CCObject.Flags.HideInHierarchy;
-            this.node.insertChild(this._labelContent, this._imageContent ? 1 : 0);
+            this._labelContent =
+                this.node.getChildByName(content) ?? new Node(content);
+            this._labelContent.hideFlags |=
+                CCObject.Flags.DontSave | CCObject.Flags.HideInHierarchy;
+            this.node.insertChild(
+                this._labelContent,
+                this._imageContent ? 1 : 0
+            );
         }
         return this._labelContent;
     }
@@ -246,8 +331,10 @@ export default class TmpRichText extends Component {
     private get imageContent(): Node {
         if (!this._imageContent) {
             const content = "TMP_IMAGE_CONTENT";
-            this._imageContent = this.node.getChildByName(content) ?? new Node(content);
-            this._imageContent.hideFlags |= CCObject.Flags.DontSave | CCObject.Flags.HideInHierarchy;
+            this._imageContent =
+                this.node.getChildByName(content) ?? new Node(content);
+            this._imageContent.hideFlags |=
+                CCObject.Flags.DontSave | CCObject.Flags.HideInHierarchy;
             this.node.insertChild(this._imageContent, 0);
         }
         return this._imageContent;
@@ -263,7 +350,11 @@ export default class TmpRichText extends Component {
                 this._updateRichText();
                 return;
             }
-            Editor.Message.request("asset-db", "query-url", this._font["_uuid"]).then((url: string) => {
+            Editor.Message.request(
+                "asset-db",
+                "query-url",
+                this._font["_uuid"]
+            ).then((url: string) => {
                 if (!url) {
                     return;
                 }
@@ -301,8 +392,7 @@ export default class TmpRichText extends Component {
 
             if (this.enabledInHierarchy) {
                 this.onEnable();
-            }
-            else {
+            } else {
                 this.onDisable();
             }
         }
@@ -337,13 +427,21 @@ export default class TmpRichText extends Component {
             }
         }
 
-        this.node.off(NodeEventType.ANCHOR_CHANGED, this._updateRichTextPosition, this);
+        this.node.off(
+            NodeEventType.ANCHOR_CHANGED,
+            this._updateRichTextPosition,
+            this
+        );
         this.node.off(NodeEventType.LAYER_CHANGED, this._applyLayer, this);
     }
 
     public start() {
         this._onFontLoaded();
-        this.node.on(NodeEventType.ANCHOR_CHANGED, this._updateRichTextPosition, this);
+        this.node.on(
+            NodeEventType.ANCHOR_CHANGED,
+            this._updateRichTextPosition,
+            this
+        );
     }
 
     private _addEventListeners(): void {
@@ -373,7 +471,10 @@ export default class TmpRichText extends Component {
         this._updateRichText();
     }
 
-    protected SplitLongStringApproximatelyIn2048(text: string, styleIndex: number) {
+    protected SplitLongStringApproximatelyIn2048(
+        text: string,
+        styleIndex: number
+    ) {
         const labelSize = this._calculateSize(styleIndex, text);
         const partStringArr: string[] = [];
         if (labelSize.x < 2048) {
@@ -381,7 +482,10 @@ export default class TmpRichText extends Component {
         } else {
             const multilineTexts = text.split("\n");
             for (let i = 0; i < multilineTexts.length; i++) {
-                const thisPartSize = this._calculateSize(styleIndex, multilineTexts[i]);
+                const thisPartSize = this._calculateSize(
+                    styleIndex,
+                    multilineTexts[i]
+                );
                 if (thisPartSize.x < 2048) {
                     partStringArr.push(multilineTexts[i]);
                 } else {
@@ -394,7 +498,11 @@ export default class TmpRichText extends Component {
                     if (currOffsetX >= this.maxWidth - this.fontSize) {
                         currOffsetX = 0;
                     }
-                    const thisPartSplitResultArr = this.splitLongStringOver2048(multilineTexts[i], styleIndex, currOffsetX);
+                    const thisPartSplitResultArr = this.splitLongStringOver2048(
+                        multilineTexts[i],
+                        styleIndex,
+                        currOffsetX
+                    );
                     partStringArr.push(...thisPartSplitResultArr);
                 }
             }
@@ -403,9 +511,13 @@ export default class TmpRichText extends Component {
     }
 
     /**
-    * @engineInternal
-    */
-    protected splitLongStringOver2048(text: string, styleIndex: number, lineOffsetX) {
+     * @engineInternal
+     */
+    protected splitLongStringOver2048(
+        text: string,
+        styleIndex: number,
+        lineOffsetX
+    ) {
         const partStringArr: string[] = [];
         const longStr = text;
 
@@ -423,7 +535,11 @@ export default class TmpRichText extends Component {
         const lineCountForOnePart = 1;
         // const sizeForOnePart = lineCountForOnePart *this.maxWidth;
 
-        let sizeForThisPart = (lineCountForOnePart * this.maxWidth === 0 || lineCountForOnePart * this.maxWidth > 2048) ? 2048 : (lineCountForOnePart * this.maxWidth);
+        let sizeForThisPart =
+            lineCountForOnePart * this.maxWidth === 0 ||
+            lineCountForOnePart * this.maxWidth > 2048
+                ? 2048
+                : lineCountForOnePart * this.maxWidth;
 
         // it does influence the first element of splitted array,
         // the element should put into the left space in current line
@@ -465,7 +581,8 @@ export default class TmpRichText extends Component {
                     break;
                 }
 
-                const nextPartExec = TmpUtils.getEnglishWordPartAtFirst(leftString);
+                const nextPartExec =
+                    TmpUtils.getEnglishWordPartAtFirst(leftString);
                 // add a character, unless there is a complete word at the beginning of the next line
 
                 if (nextPartExec && nextPartExec.length > 0) {
@@ -485,22 +602,25 @@ export default class TmpRichText extends Component {
             // reduce condition：size > maxwidth && curString.length >= 2
             // while (leftTryTimes && curString.length >= 2 && curStringSize.x > sizeForOnePart) {
 
-            while (leftTryTimes && curString.length >= 2 && curStringSizeX > sizeForThisPart) {
+            while (
+                leftTryTimes &&
+                curString.length >= 2 &&
+                curStringSizeX > sizeForThisPart
+            ) {
                 curEnd -= curWordStep;
                 //     curString = longStr.substring(curStart, curEnd);
                 //     curStringSize = this._calculateSize(styleIndex, curString);
                 //     //after the first reduction, the step should be 1.
                 //     curWordStep = 1;
 
-
                 //     leftTryTimes--;
                 // }
-
 
                 // //consider there is a part of a word at the end of this line, it should be moved to the next line
                 // if (curString.length >= 2) {
 
-                const lastWordExec = TmpUtils.getEnglishWordPartAtLast(curString);
+                const lastWordExec =
+                    TmpUtils.getEnglishWordPartAtLast(curString);
                 //     if (lastWordExec && lastWordExec.length > 0
                 //         //to avoid endless loop when there is only one word in this line
                 //         && curString !== lastWordExec[0]) {
@@ -516,7 +636,6 @@ export default class TmpRichText extends Component {
                 // //after the first reduction, the step should be 1.
                 // curWordStep = 1;
 
-
                 leftTryTimes--;
             }
 
@@ -528,8 +647,11 @@ export default class TmpRichText extends Component {
             // const partStep = curString.length;
             // after putting the first element in array, we should reset sizeForThisPart
 
-            sizeForThisPart = (lineCountForOnePart * this.maxWidth === 0 || lineCountForOnePart * this.maxWidth > 2048)
-                ? 2048 : (lineCountForOnePart * this.maxWidth);
+            sizeForThisPart =
+                lineCountForOnePart * this.maxWidth === 0 ||
+                lineCountForOnePart * this.maxWidth > 2048
+                    ? 2048
+                    : lineCountForOnePart * this.maxWidth;
 
             // estimate the next element length
             // precise calculation is in the next loop
@@ -545,7 +667,6 @@ export default class TmpRichText extends Component {
             leftString = longStr.substring(curEnd);
             // leftStringSize = this._calculateSize(styleIndex, leftString);
 
-
             leftTryTimes--;
 
             // Exit: If the left part string size is less than 2048, the method will finish.
@@ -553,8 +674,7 @@ export default class TmpRichText extends Component {
             // Exit1: If the current string is the last part of text and its size is less than 2048,
             // the leftString will be empty string, then we should exit
 
-            if (!leftString
-                && curStringSizeX < 2048) {
+            if (!leftString && curStringSizeX < 2048) {
                 curStart = text.length;
                 curEnd = text.length;
                 // curString = leftString;
@@ -566,14 +686,16 @@ export default class TmpRichText extends Component {
                 break;
                 // } else {
                 //     curStringSize = this._calculateSize(styleIndex, curString);
-
             }
         }
 
         return partStringArr;
     }
 
-    private _measureText(styleIndex: number, string?: string): number | ((s: string) => number) {
+    private _measureText(
+        styleIndex: number,
+        string?: string
+    ): number | ((s: string) => number) {
         const func = (s: string) => {
             const labelSize = this._calculateSize(styleIndex, s);
             return labelSize.width;
@@ -606,7 +728,10 @@ export default class TmpRichText extends Component {
         for (const seg of this._segments) {
             const clickHandler = seg.clickHandler;
             const clickParam = seg.clickParam;
-            if (clickHandler && this._containsTouchLocation(seg, event.touch!.getUILocation())) {
+            if (
+                clickHandler &&
+                this._containsTouchLocation(seg, event.touch!.getUILocation())
+            ) {
                 components.forEach((component) => {
                     const func = component[clickHandler];
                     if (component.enabledInHierarchy && func) {
@@ -636,7 +761,10 @@ export default class TmpRichText extends Component {
         const children = node.children;
         for (let i = children.length - 1; i >= 0; i--) {
             const child = children[i];
-            if (child.name === RichTextChildName || child.name === RichTextChildImageName) {
+            if (
+                child.name === RichTextChildName ||
+                child.name === RichTextChildImageName
+            ) {
                 if (child.parent === node) {
                     child.parent = null;
                 } else {
@@ -677,14 +805,20 @@ export default class TmpRichText extends Component {
         this.node.children.forEach((content) => {
             for (let i = content.children.length - 1; i >= 0; i--) {
                 const child = content.children[i];
-                if (child.name === RichTextChildName || child.name === RichTextChildImageName) {
+                if (
+                    child.name === RichTextChildName ||
+                    child.name === RichTextChildImageName
+                ) {
                     child.active = active;
                 }
             }
         });
     }
 
-    private _addLabelSegment(stringToken: string, styleIndex: number): ISegment {
+    private _addLabelSegment(
+        stringToken: string,
+        styleIndex: number
+    ): ISegment {
         let labelSegment: ISegment;
         if (this._labelSegmentsCache.length === 0) {
             labelSegment = this._createFontLabel(stringToken);
@@ -708,35 +842,64 @@ export default class TmpRichText extends Component {
         labelSegment.lineCount = this._lineCount;
         labelSegment.node._uiProps.uiTransformComp!.setAnchorPoint(0, 0);
         labelSegment.node.layer = this.node.layer;
-        this.labelContent.insertChild(labelSegment.node, this._labelChildrenNum++);
+        this.labelContent.insertChild(
+            labelSegment.node,
+            this._labelChildrenNum++
+        );
         this._applyTextAttribute(labelSegment);
         this._segments.push(labelSegment);
 
         return labelSegment;
     }
 
-    private _updateRichTextWithMaxWidth(labelString, labelWidth, styleIndex): void {
+    private _updateRichTextWithMaxWidth(
+        labelString,
+        labelWidth,
+        styleIndex
+    ): void {
         let fragmentWidth = labelWidth;
         let labelSegment: ISegment;
 
-        if (this._lineOffsetX > 0 && fragmentWidth + this._lineOffsetX > this._maxWidth) {
+        if (
+            this._lineOffsetX > 0 &&
+            fragmentWidth + this._lineOffsetX > this._maxWidth
+        ) {
             // concat previous line
 
             let checkStartIndex = 0;
             while (this._lineOffsetX <= this._maxWidth) {
-                const checkEndIndex = this._getFirstWordLen(labelString, checkStartIndex, labelString.length);
-                const checkString = labelString.substr(checkStartIndex, checkEndIndex);
-                const checkStringWidth = this._measureText(styleIndex, checkString) as number;
+                const checkEndIndex = this._getFirstWordLen(
+                    labelString,
+                    checkStartIndex,
+                    labelString.length
+                );
+                const checkString = labelString.substr(
+                    checkStartIndex,
+                    checkEndIndex
+                );
+                const checkStringWidth = this._measureText(
+                    styleIndex,
+                    checkString
+                ) as number;
 
                 if (this._lineOffsetX + checkStringWidth <= this._maxWidth) {
                     this._lineOffsetX += checkStringWidth;
                     checkStartIndex += checkEndIndex;
                 } else {
                     if (checkStartIndex > 0) {
-                        const remainingString = labelString.substr(0, checkStartIndex);
+                        const remainingString = labelString.substr(
+                            0,
+                            checkStartIndex
+                        );
                         this._addLabelSegment(remainingString, styleIndex);
-                        labelString = labelString.substr(checkStartIndex, labelString.length);
-                        fragmentWidth = this._measureText(styleIndex, labelString) as number;
+                        labelString = labelString.substr(
+                            checkStartIndex,
+                            labelString.length
+                        );
+                        fragmentWidth = this._measureText(
+                            styleIndex,
+                            labelString
+                        ) as number;
                     }
                     this._updateLineInfo();
                     break;
@@ -744,12 +907,19 @@ export default class TmpRichText extends Component {
             }
         }
         if (fragmentWidth > this._maxWidth) {
-            const fragments = TmpUtils.fragmentText(labelString, fragmentWidth, this._maxWidth,
-                this._measureText(styleIndex) as unknown as (s: string) => number);
+            const fragments = TmpUtils.fragmentText(
+                labelString,
+                fragmentWidth,
+                this._maxWidth,
+                this._measureText(styleIndex) as unknown as (
+                    s: string
+                ) => number
+            );
             for (let k = 0; k < fragments.length; ++k) {
                 const splitString = fragments[k];
                 labelSegment = this._addLabelSegment(splitString, styleIndex);
-                const labelSize = labelSegment.node._uiProps.uiTransformComp!.contentSize;
+                const labelSize =
+                    labelSegment.node._uiProps.uiTransformComp!.contentSize;
                 this._lineOffsetX += labelSize.width;
                 if (fragments.length > 1 && k < fragments.length - 1) {
                     this._updateLineInfo();
@@ -786,29 +956,44 @@ export default class TmpRichText extends Component {
             if (oldItem.text !== newItem.text) {
                 return true;
             } else {
-                const oldStyle = oldItem.style; const newStyle = newItem.style;
+                const oldStyle = oldItem.style;
+                const newStyle = newItem.style;
                 if (oldStyle) {
                     if (newStyle) {
                         if (!!newStyle.outline !== !!oldStyle.outline) {
                             return true;
                         }
-                        if (oldStyle.size !== newStyle.size
-                            || oldStyle.italic !== newStyle.italic
-                            || oldStyle.isImage !== newStyle.isImage) {
+                        if (
+                            oldStyle.size !== newStyle.size ||
+                            oldStyle.italic !== newStyle.italic ||
+                            oldStyle.isImage !== newStyle.isImage
+                        ) {
                             return true;
                         }
-                        if (oldStyle.src !== newStyle.src
-                            || oldStyle.imageAlign !== newStyle.imageAlign
-                            || oldStyle.imageHeight !== newStyle.imageHeight
-                            || oldStyle.imageWidth !== newStyle.imageWidth
-                            || oldStyle.imageOffset !== newStyle.imageOffset) {
+                        if (
+                            oldStyle.src !== newStyle.src ||
+                            oldStyle.imageAlign !== newStyle.imageAlign ||
+                            oldStyle.imageHeight !== newStyle.imageHeight ||
+                            oldStyle.imageWidth !== newStyle.imageWidth ||
+                            oldStyle.imageOffset !== newStyle.imageOffset
+                        ) {
                             return true;
                         }
-                    } else if (oldStyle.size || oldStyle.italic || oldStyle.isImage || oldStyle.outline) {
+                    } else if (
+                        oldStyle.size ||
+                        oldStyle.italic ||
+                        oldStyle.isImage ||
+                        oldStyle.outline
+                    ) {
                         return true;
                     }
                 } else if (newStyle) {
-                    if (newStyle.size || newStyle.italic || newStyle.isImage || newStyle.outline) {
+                    if (
+                        newStyle.size ||
+                        newStyle.italic ||
+                        newStyle.isImage ||
+                        newStyle.outline
+                    ) {
                         return true;
                     }
                 }
@@ -824,7 +1009,10 @@ export default class TmpRichText extends Component {
 
         const style = richTextElement.style;
         const spriteFrameName = style.src;
-        const spriteFrame = this._imageAtlas && spriteFrameName && this._imageAtlas.getSpriteFrame(spriteFrameName);
+        const spriteFrame =
+            this._imageAtlas &&
+            spriteFrameName &&
+            this._imageAtlas.getSpriteFrame(spriteFrameName);
         if (!spriteFrame) {
             warnID(4400);
         } else {
@@ -835,7 +1023,10 @@ export default class TmpRichText extends Component {
                     segment.node._uiProps.uiTransformComp!.setAnchorPoint(0, 1);
                     break;
                 case "center":
-                    segment.node._uiProps.uiTransformComp!.setAnchorPoint(0, 0.5);
+                    segment.node._uiProps.uiTransformComp!.setAnchorPoint(
+                        0,
+                        0.5
+                    );
                     break;
                 default:
                     segment.node._uiProps.uiTransformComp!.setAnchorPoint(0, 0);
@@ -846,7 +1037,10 @@ export default class TmpRichText extends Component {
                 segment.imageOffset = style.imageOffset;
             }
             segment.node.layer = this.node.layer;
-            this.imageContent.insertChild(segment.node, this._labelChildrenNum++);
+            this.imageContent.insertChild(
+                segment.node,
+                this._labelChildrenNum++
+            );
             this._segments.push(segment);
 
             const spriteRect = spriteFrame.rect.clone();
@@ -881,7 +1075,10 @@ export default class TmpRichText extends Component {
                     this._labelWidth = this._lineOffsetX;
                 }
             }
-            segment.node._uiProps.uiTransformComp!.setContentSize(spriteWidth, spriteHeight);
+            segment.node._uiProps.uiTransformComp!.setContentSize(
+                spriteWidth,
+                spriteHeight
+            );
             segment.lineCount = this._lineCount;
 
             segment.clickHandler = "";
@@ -926,13 +1123,20 @@ export default class TmpRichText extends Component {
                     this._updateLineInfo();
                     continue;
                 }
-                if (richTextElement.style && richTextElement.style.isImage && this._imageAtlas) {
+                if (
+                    richTextElement.style &&
+                    richTextElement.style.isImage &&
+                    this._imageAtlas
+                ) {
                     this._addRichTextImageElement(richTextElement);
                     continue;
                 }
             }
 
-            const splitArr: string[] = this.SplitLongStringApproximatelyIn2048(text, i);
+            const splitArr: string[] = this.SplitLongStringApproximatelyIn2048(
+                text,
+                i
+            );
             text = splitArr.join("\n");
 
             const multilineTexts = text.split("\n");
@@ -942,7 +1146,10 @@ export default class TmpRichText extends Component {
                 if (labelString === "") {
                     // for continues \n
 
-                    if (this._isLastComponentCR(text) && j === multilineTexts.length - 1) {
+                    if (
+                        this._isLastComponentCR(text) &&
+                        j === multilineTexts.length - 1
+                    ) {
                         continue;
                     }
                     this._updateLineInfo();
@@ -952,21 +1159,35 @@ export default class TmpRichText extends Component {
                 lastEmptyLine = false;
 
                 if (this._maxWidth > 0) {
-                    const labelWidth = this._measureText(i, labelString) as number;
-                    this._updateRichTextWithMaxWidth(labelString, labelWidth, i);
+                    const labelWidth = this._measureText(
+                        i,
+                        labelString
+                    ) as number;
+                    this._updateRichTextWithMaxWidth(
+                        labelString,
+                        labelWidth,
+                        i
+                    );
 
-                    if (multilineTexts.length > 1 && j < multilineTexts.length - 1) {
+                    if (
+                        multilineTexts.length > 1 &&
+                        j < multilineTexts.length - 1
+                    ) {
                         this._updateLineInfo();
                     }
                 } else {
                     label = this._addLabelSegment(labelString, i);
 
-                    this._lineOffsetX += label.node._uiProps.uiTransformComp!.width;
+                    this._lineOffsetX +=
+                        label.node._uiProps.uiTransformComp!.width;
                     if (this._lineOffsetX > this._labelWidth) {
                         this._labelWidth = this._lineOffsetX;
                     }
 
-                    if (multilineTexts.length > 1 && j < multilineTexts.length - 1) {
+                    if (
+                        multilineTexts.length > 1 &&
+                        j < multilineTexts.length - 1
+                    ) {
                         this._updateLineInfo();
                     }
                 }
@@ -979,11 +1200,15 @@ export default class TmpRichText extends Component {
         if (this._maxWidth > 0) {
             this._labelWidth = this._maxWidth;
         }
-        this._labelHeight = (this._lineCount + BASELINE_RATIO) * this._lineHeight;
+        this._labelHeight =
+            (this._lineCount + BASELINE_RATIO) * this._lineHeight;
 
         // trigger "size-changed" event
 
-        this.node._uiProps.uiTransformComp!.setContentSize(this._labelWidth, this._labelHeight);
+        this.node._uiProps.uiTransformComp!.setContentSize(
+            this._labelWidth,
+            this._labelHeight
+        );
 
         this._updateRichTextPosition();
         this._layoutDirty = false;
@@ -991,14 +1216,20 @@ export default class TmpRichText extends Component {
 
     private _getFirstWordLen(text, startIndex, textLen): number {
         let character = text.charAt(startIndex);
-        if (TmpUtils.isUnicodeCJK(character) || TmpUtils.isUnicodeSpace(character)) {
+        if (
+            TmpUtils.isUnicodeCJK(character) ||
+            TmpUtils.isUnicodeSpace(character)
+        ) {
             return 1;
         }
 
         let len = 1;
         for (let index = startIndex + 1; index < textLen; ++index) {
             character = text.charAt(index);
-            if (TmpUtils.isUnicodeSpace(character) || TmpUtils.isUnicodeCJK(character)) {
+            if (
+                TmpUtils.isUnicodeSpace(character) ||
+                TmpUtils.isUnicodeCJK(character)
+            ) {
                 break;
             }
 
@@ -1023,7 +1254,8 @@ export default class TmpRichText extends Component {
                 nextLineIndex = lineCount;
             }
 
-            let lineOffsetX = this._labelWidth * (this._horizontalAlign * 0.5 - anchorX);
+            let lineOffsetX =
+                this._labelWidth * (this._horizontalAlign * 0.5 - anchorX);
             switch (this._horizontalAlign) {
                 case HorizontalTextAlignment.LEFT:
                     break;
@@ -1038,9 +1270,12 @@ export default class TmpRichText extends Component {
             }
 
             const pos = segment.node.position;
-            segment.node.setPosition(nextTokenX + lineOffsetX,
-                this._lineHeight * (totalLineCount - lineCount) - this._labelHeight * anchorY,
-                pos.z);
+            segment.node.setPosition(
+                nextTokenX + lineOffsetX,
+                this._lineHeight * (totalLineCount - lineCount) -
+                    this._labelHeight * anchorY,
+                pos.z
+            );
 
             if (lineCount === nextLineIndex) {
                 nextTokenX += segment.node._uiProps.uiTransformComp!.width;
@@ -1062,13 +1297,15 @@ export default class TmpRichText extends Component {
 
                 switch (segment.node._uiProps.uiTransformComp!.anchorY) {
                     case 1:
-                        position.y += (lineHeightSet + ((lineHeightReal - lineHeightSet) / 2));
+                        position.y +=
+                            lineHeightSet +
+                            (lineHeightReal - lineHeightSet) / 2;
                         break;
                     case 0.5:
-                        position.y += (lineHeightReal / 2);
+                        position.y += lineHeightReal / 2;
                         break;
                     default:
-                        position.y += ((lineHeightReal - lineHeightSet) / 2);
+                        position.y += (lineHeightReal - lineHeightSet) / 2;
                         break;
                 }
                 // adjust img offset (from <img offset=12|12,34>)
@@ -1095,22 +1332,21 @@ export default class TmpRichText extends Component {
             //     position.y -= outline.width;
             //     segment.node.position = position;
             // }
-
         }
     }
 
     /**
      * Hexadecimal color conversion
-     * @param color 
+     * @param color
      */
     private _convertLiteralColorValue(color: string): Color {
         const colorValue = color.toUpperCase();
         if (Color[colorValue]) {
             const colorUse: Color = Color[colorValue];
             return colorUse;
-        }
-        else {
-            let hexString = (color.indexOf("#") === 0) ? color.substring(1) : color;
+        } else {
+            let hexString =
+                color.indexOf("#") === 0 ? color.substring(1) : color;
             let r = parseInt(hexString.substring(0, 2), 16) || 0;
             let g = parseInt(hexString.substring(2, 4), 16) || 0;
             let b = parseInt(hexString.substring(4, 6), 16) || 0;
@@ -1126,7 +1362,8 @@ export default class TmpRichText extends Component {
      * Update font styles
      */
     private _applyTextAttribute(labelSeg: ISegment): void {
-        let labelComponent: TextMeshPro = labelSeg.node.getComponent(TextMeshPro);
+        let labelComponent: TextMeshPro =
+            labelSeg.node.getComponent(TextMeshPro);
         if (!labelComponent) {
             return;
         }
@@ -1139,7 +1376,9 @@ export default class TmpRichText extends Component {
         }
 
         if (textStyle && textStyle.color) {
-            labelComponent.color = this._convertLiteralColorValue(textStyle.color);
+            labelComponent.color = this._convertLiteralColorValue(
+                textStyle.color
+            );
         } else {
             labelComponent.color = Color.WHITE;
         }
@@ -1147,16 +1386,27 @@ export default class TmpRichText extends Component {
         labelComponent.setFont(this.font, this.textures);
         labelComponent.lineHeight = this.lineHeight;
 
-        labelComponent.vertexColorGradient = Boolean(textStyle && textStyle.colorGradient);
+        labelComponent.vertexColorGradient = Boolean(
+            textStyle && textStyle.colorGradient
+        );
         if (labelComponent.vertexColorGradient) {
-            labelComponent.colorLB = this._convertLiteralColorValue(textStyle.colorGradient.lb);
-            labelComponent.colorRB = this._convertLiteralColorValue(textStyle.colorGradient.rb);
-            labelComponent.colorLT = this._convertLiteralColorValue(textStyle.colorGradient.lt);
-            labelComponent.colorRT = this._convertLiteralColorValue(textStyle.colorGradient.rt);
+            labelComponent.colorLB = this._convertLiteralColorValue(
+                textStyle.colorGradient.lb
+            );
+            labelComponent.colorRB = this._convertLiteralColorValue(
+                textStyle.colorGradient.rb
+            );
+            labelComponent.colorLT = this._convertLiteralColorValue(
+                textStyle.colorGradient.lt
+            );
+            labelComponent.colorRT = this._convertLiteralColorValue(
+                textStyle.colorGradient.rt
+            );
         }
 
         if (textStyle && textStyle.face) {
-            labelComponent.tmpUniform.faceColor = this._convertLiteralColorValue(textStyle.face.color);
+            labelComponent.tmpUniform.faceColor =
+                this._convertLiteralColorValue(textStyle.face.color);
             labelComponent.tmpUniform.faceDilate = textStyle.face.dilate;
             labelComponent.tmpUniform.faceSoftness = textStyle.face.softness;
         } else {
@@ -1166,32 +1416,51 @@ export default class TmpRichText extends Component {
         }
 
         labelComponent.enableItalic = Boolean(textStyle && textStyle.italic);
-        labelComponent.enableUnderline = Boolean(textStyle && textStyle.underline);
+        labelComponent.enableUnderline = Boolean(
+            textStyle && textStyle.underline
+        );
         if (labelComponent.enableUnderline) {
             labelComponent.underlineOffset = textStyle.offset || 0;
         }
-        labelComponent.enableStrikethrough = Boolean(textStyle && textStyle.strikethrough);
+        labelComponent.enableStrikethrough = Boolean(
+            textStyle && textStyle.strikethrough
+        );
         if (labelComponent.enableStrikethrough) {
             labelComponent.strikethroughOffset = textStyle.offset || 0;
         }
 
-        labelComponent.tmpUniform.enableOutline = Boolean(textStyle && textStyle.outline);
+        labelComponent.tmpUniform.enableOutline = Boolean(
+            textStyle && textStyle.outline
+        );
         if (textStyle && textStyle.outline) {
-            labelComponent.tmpUniform.outlineColor = this._convertLiteralColorValue(textStyle.outline.color);
-            labelComponent.tmpUniform.outlineThickness = textStyle.outline.thickness;
+            labelComponent.tmpUniform.outlineColor =
+                this._convertLiteralColorValue(textStyle.outline.color);
+            labelComponent.tmpUniform.outlineThickness =
+                textStyle.outline.thickness;
         }
 
-        labelComponent.tmpUniform.enableUnderlay = Boolean(textStyle && textStyle.underlay);
+        labelComponent.tmpUniform.enableUnderlay = Boolean(
+            textStyle && textStyle.underlay
+        );
         if (labelComponent.tmpUniform.enableUnderlay) {
-            labelComponent.tmpUniform.underlayColor = this._convertLiteralColorValue(textStyle.underlay.color);
-            labelComponent.tmpUniform.underlayOffset = v2(textStyle.underlay.x, textStyle.underlay.y);
-            labelComponent.tmpUniform.underlayDilate = textStyle.underlay.dilate;
-            labelComponent.tmpUniform.underlaySoftness = textStyle.underlay.softness;
+            labelComponent.tmpUniform.underlayColor =
+                this._convertLiteralColorValue(textStyle.underlay.color);
+            labelComponent.tmpUniform.underlayOffset = v2(
+                textStyle.underlay.x,
+                textStyle.underlay.y
+            );
+            labelComponent.tmpUniform.underlayDilate =
+                textStyle.underlay.dilate;
+            labelComponent.tmpUniform.underlaySoftness =
+                textStyle.underlay.softness;
         }
 
-        labelComponent.tmpUniform.enableGlow = Boolean(textStyle && textStyle.glow);
+        labelComponent.tmpUniform.enableGlow = Boolean(
+            textStyle && textStyle.glow
+        );
         if (labelComponent.tmpUniform.enableGlow) {
-            labelComponent.tmpUniform.glowColor = this._convertLiteralColorValue(textStyle.glow.color);
+            labelComponent.tmpUniform.glowColor =
+                this._convertLiteralColorValue(textStyle.glow.color);
             labelComponent.tmpUniform.glowOffset = textStyle.glow.offset;
             labelComponent.tmpUniform.glowInner = textStyle.glow.inner;
             labelComponent.tmpUniform.glowOuter = textStyle.glow.outer;

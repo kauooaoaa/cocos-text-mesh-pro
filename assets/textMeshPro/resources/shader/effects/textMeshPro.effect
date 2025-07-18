@@ -97,7 +97,7 @@ CCProgram tmp-vs %{
     #if SAMPLE_FROM_RT
       CC_HANDLE_RT_SAMPLE_FLIP(uv0);
     #endif
-    color = a_color * a_color2;
+    color = a_color *a_color2;
     texture_idx = a_texture_idx;
 
     return pos;
@@ -270,12 +270,12 @@ CCProgram tmp-fs %{
     float faceValue = 1.0 - faceDilate;
     float faceDistance = smoothstep(faceValue - faceSoftness, faceValue + faceSoftness, curDistance);
     vec4 fragColor = vec4(color.rgb * faceColor.rgb, faceColor.a * faceDistance);
-    
+        
     // #if USE_LINEAR_GRADIENT_2 
-    float gradientPosition =clamp((uv0.y) / (1.0), 0.0, 1.0);
-    vec4 grad = mix(vec4(1,0,0,255),vec4(0,0,255,255),uv0.y);
-    fragColor.rgb = grad.rgb;
-    vec4 lastColor;
+    // float gradientPosition =clamp((uv0.y) / (1.0), 0.0, 1.0);
+    // vec4 grad = mix(vec4(1,0,0,255),vec4(0,0,255,255),uv0.y);
+    // fragColor.rgb = grad.rgb;
+    // vec4 lastColor;
     // #endif
     // if (gradientPosition > gradientColorRatio2) {
     //   float t1 = clamp( gradientPosition/ gradientColorRatio2, 0.0, 1.0);

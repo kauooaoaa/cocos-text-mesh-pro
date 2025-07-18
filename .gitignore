@@ -22,3 +22,7 @@ node_modules/
 # WebStorm
 #//////////////////////////
 .idea/
+assets/RenderData.dart
+assets/RenderData.dart.meta
+assets/RenderDataonbufferfill.dart
+assets/RenderDataonbufferfill.dart.meta

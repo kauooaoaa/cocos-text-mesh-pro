@@ -1,6 +1,7 @@
 import {
     Color,
     HorizontalTextAlignment,
+    IColorLike,
     log,
     Mat4,
     misc,
@@ -17,22 +18,24 @@ import { JSB } from "cc/env";
 import TextMeshPro, { TmpOverflow } from "../TextMeshPro";
 import TmpFontConfig, { TmpFontLetter } from "./TmpFontConfig";
 import TmpUtils from "./TmpUtils";
+import { info } from "console";
 
 const tempColor = new Color(255, 255, 255, 255);
 const vec3_temp = new Vec3();
 const _worldMatrix = new Mat4();
 
 const WHITE = Color.WHITE;
-/** 斜体倾斜弧度值 */
+/** Italic tilt radian value */
 const ITALIC_REDIANS = misc.degreesToRadians(15);
-/** 下划线字符code */
+/** Underscore character code */
 const UNDERLINE_CODE = 95;
-/** 省略号字符code */
+/** ellipsis character code */
 const ELLIPSIS_CODE = 46;
 const ELLIPSIS_CHAR = ".";
 const ELLIPSIS_NUM = 3;
 
 // share data of bmfont
+
 let shareLabelInfo = {
     fontAtlas: null as TmpFontConfig,
 
@@ -78,39 +81,41 @@ let _labelHeight = 0;
 let _maxLineWidth = 0;
 let QUAD_INDICES;
 
-/** 斜体计算向量 */
+/** Italic calculation vector */
 let _italicVec = v2();
-/** 画下划线、删除线所需的数据 */
+/** Data required for underscores and strikethroughs */
 let _extraLinesData: {
     [lineIndex: number]: { lineIndex: number; first: any; last: any };
 } = {};
 let _extraLineDef: TmpFontLetter = null;
-/** 省略号所需的数据 */
+/** Data required for ellipsis */
 let _ellipsisDef: TmpFontLetter = null;
 let _ellipsisWidth: number = 0;
 
+/** Data required for linear gradients */
+let _colorlikeCodedUVs: IColorLike[] = [];
 /**
- * 字符渲染数据
+ * Character rendering data
  */
 export class TmpLetterInfo {
-    /** 标记字符是否需要渲染 */
+    /** Does marker characters need to be rendered */
     public valid = true;
     public char = "";
     public x = 0;
     public y = 0;
     public line = 0;
     public hash = "";
-    /** 标记处于需要渲染的字符中的第几位 */
+    /** Tags where the character is in the character to be rendered */
     public quadsIndex = 0;
-    /** 主动设置字符是否可见 */
+    /** Actively set whether characters are visible */
     public visible = true;
 }
 
 /**
- * TextMeshPro顶点数据管理
+ * TextMeshPro Vertex Data Management
  */
 export default class TmpAssembler {
-    /** 每个顶点的数据长度 */
+    /** Data length for each vertex */
     protected static floatsPerVert: number = 14;
     protected static verticesCount: number = 4;
     protected static indicesCount: number = 6;
@@ -128,6 +133,7 @@ export default class TmpAssembler {
         tempColor.set(comp.color);
         tempColor.a = node._uiProps.opacity * 255;
         // Fill All
+
         const chunk = comp.renderData.chunk;
         const dataList = comp.renderData.data;
         const vData = chunk.vb;
@@ -143,12 +149,20 @@ export default class TmpAssembler {
             vData[vertexOffset++] = vec3_temp.x;
             vData[vertexOffset++] = vec3_temp.y;
             vData[vertexOffset++] = vec3_temp.z;
-            Color.toArray(vData, tempColor, vertexOffset + 2);
+            let colorCodedGlyphBounds = vert["color"] as IColorLike;
+            if (
+                comp.linearGradientOptions.linearColorGradient &&
+                _colorlikeCodedUVs[i]
+            ) {
+                colorCodedGlyphBounds = _colorlikeCodedUVs[i];
+            }
+            Color.toArray(vData, colorCodedGlyphBounds, vertexOffset + 2);
             Color.toArray(vData, vert["colorExtra"], vertexOffset + 6);
             vertexOffset += 11;
         }
-
+        log(vData);
         // fill index data
+
         const bid = chunk.bufferId;
         const vid = chunk.vertexOffset;
         const meshBuffer = chunk.meshBuffer;
@@ -163,12 +177,13 @@ export default class TmpAssembler {
             ib[indexOffset++] = start + 3;
             ib[indexOffset++] = start + 2;
         }
+        log(ib);
         meshBuffer.indexOffset += comp.renderData.indexCount;
         meshBuffer.setDirty();
     }
 
     /**
-     * 执行一次渲染数据更新
+     * Perform a rendering data update
      */
     public static updateRenderData(comp: TextMeshPro): void {
         if (!comp.renderData) {
@@ -260,7 +275,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 更新渲染所需的前置数据
+     * Update the pre-data required for rendering
      */
     private static _updateProperties(comp: TextMeshPro): void {
         _fntConfig = comp.fontConfig;
@@ -285,6 +300,7 @@ export default class TmpAssembler {
         shareLabelInfo.margin = 0;
 
         // should wrap text
+
         if (_overflow === TmpOverflow.NONE) {
             _isWrapText = false;
             _contentSize.width += shareLabelInfo.margin * 2;
@@ -300,7 +316,8 @@ export default class TmpAssembler {
 
         this._setupBMFontOverflowMetrics();
 
-        // 斜体计算
+        // Italic calculation
+
         if (comp.enableItalic) {
             _italicVec.x = 0;
             _italicVec.y = _contentSize.height / 2;
@@ -309,7 +326,8 @@ export default class TmpAssembler {
             _contentSize.height -=
                 Math.abs(_contentSize.height / 2 - _italicVec.y) * 2;
         }
-        // 下划线、删除线
+        // Underline, delete line
+
         if (comp.enableUnderline || comp.enableStrikethrough) {
             _extraLineDef = shareLabelInfo.fontAtlas.getLetter(
                 UNDERLINE_CODE + shareLabelInfo.hash
@@ -318,7 +336,8 @@ export default class TmpAssembler {
                 log(`Can't find letter definition in textures. letter: _`);
             }
         }
-        // 省略号
+        // Ellipsis
+
         if (comp.overflow === TmpOverflow.ELLIPSIS) {
             _ellipsisDef = shareLabelInfo.fontAtlas.getLetter(
                 ELLIPSIS_CODE + shareLabelInfo.hash
@@ -357,7 +376,8 @@ export default class TmpAssembler {
             this._multilineTextWrapByChar();
         }
 
-        // shrink
+        // Shrink
+
         if (_overflow === TmpOverflow.SHRINK && _fontSize > 0) {
             let scaleHeight = _bmfontScale;
             let scaleWidth = _bmfontScale;
@@ -395,7 +415,8 @@ export default class TmpAssembler {
 
         this._computeAlignmentOffset();
 
-        // 顶点数据填充
+        // Vertex data filling
+
         this._updateQuads();
     }
 
@@ -408,7 +429,8 @@ export default class TmpAssembler {
     }
 
     private static _multilineTextWrap(nextTokenFunc: Function): boolean {
-        // 省略号处理
+        // Ellipsis processing
+
         let ellipsisMaxLines = 0;
         let useEllipsis = false;
         if (_overflow === TmpOverflow.ELLIPSIS && _ellipsisDef) {
@@ -434,7 +456,8 @@ export default class TmpAssembler {
         for (let index = 0; index < textLen; ) {
             let character = _string.charAt(index);
             if (character === "\n") {
-                // 省略号处理
+                // Ellipsis processing
+
                 if (
                     _overflow === TmpOverflow.ELLIPSIS &&
                     _ellipsisDef &&
@@ -442,10 +465,12 @@ export default class TmpAssembler {
                 ) {
                     this._recordEllipsis(nextTokenY, letterPosition, lineIndex);
                     useEllipsis = true;
-                    // 更新_linesWidth
+                    // Update lines width
+
                     let ellipsisInfo =
                         _comp.lettersInfo[_comp.lettersInfo.length - 1];
-                    // letterRight = ellipsisInfo.x + (_ellipsisDef.w) * _bmfontScale - shareLabelInfo.margin;
+                    // letterRight = ellipsisInfo.x + (_ellipsisDef.w) *_bmfontScale -shareLabelInfo.margin;
+
                     letterRight =
                         ellipsisInfo.x +
                         (_ellipsisDef.xAdvance - _ellipsisDef.offsetX) *
@@ -496,7 +521,8 @@ export default class TmpAssembler {
                     letterDef.offsetX * _bmfontScale -
                     shareLabelInfo.margin;
 
-                // 斜边处理
+                // Beveled edge treatment
+
                 if ((_comp as TextMeshPro).enableItalic) {
                     _italicVec.x = 0;
                     _italicVec.y = (letterDef.h * _bmfontScale) / 2;
@@ -504,7 +530,8 @@ export default class TmpAssembler {
                     letterX += Math.abs(_italicVec.x);
                 }
 
-                // 省略号处理
+                // Ellipsis processing
+
                 if (_overflow === TmpOverflow.ELLIPSIS && _ellipsisDef) {
                     if (
                         letterX +
@@ -519,10 +546,12 @@ export default class TmpAssembler {
                                 lineIndex
                             );
                             useEllipsis = true;
-                            // 更新_linesWidth
+                            // Update lines width
+
                             let ellipsisInfo =
                                 _comp.lettersInfo[_comp.lettersInfo.length - 1];
-                            // letterRight = ellipsisInfo.x + (_ellipsisDef.w) * _bmfontScale - shareLabelInfo.margin;
+                            // letterRight = ellipsisInfo.x + (_ellipsisDef.w) *_bmfontScale -shareLabelInfo.margin;
+
                             letterRight =
                                 ellipsisInfo.x +
                                 (_ellipsisDef.xAdvance - _ellipsisDef.offsetX) *
@@ -579,8 +608,9 @@ export default class TmpAssembler {
                     _spacingX -
                     shareLabelInfo.margin * 2;
 
-                tokenRight = nextLetterX; //letterPosition.x + letterDef.w * _bmfontScale - shareLabelInfo.margin;
-                // 斜边处理
+                tokenRight = nextLetterX; //letterPosition.x + letterDef.w *_bmfontScale -shareLabelInfo.margin;
+                // Beveled edge treatment
+
                 if ((_comp as TextMeshPro).enableItalic) {
                     _italicVec.x = 0;
                     _italicVec.y = (letterDef.h * _bmfontScale) / 2;
@@ -660,7 +690,8 @@ export default class TmpAssembler {
             }
         }
 
-        // 记录letterRight与nextTokenX的差值，供富文本排版使用
+        // Record the difference between letter right and next token x for use in rich text typesetting
+
         _comp["_richTextDeltaX"] = nextTokenX - letterRight;
 
         return true;
@@ -730,7 +761,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 从已记录的字符中倒退，直到能放下省略号
+     * Rewind from recorded characters until the ellipsis can be dropped
      */
     private static _recordEllipsis(
         nextTokenY: number,
@@ -763,7 +794,8 @@ export default class TmpAssembler {
         if (lastIndex < 0) {
             nextX = 0;
         }
-        // 记录省略号
+        // Record ellipsis
+
         letterPosition.y =
             nextTokenY -
             _ellipsisDef.offsetY * _bmfontScale +
@@ -787,7 +819,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 记录无需渲染的占位符
+     * Record placeholders that do not need to be rendered
      */
     private static _recordPlaceholderInfo(
         letterIndex: number,
@@ -805,7 +837,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 记录需要渲染的字符
+     * Record the characters that need to be rendered
      */
     private static _recordLetterInfo(
         letterPosition: Vec2,
@@ -854,7 +886,8 @@ export default class TmpAssembler {
                 break;
         }
 
-        // TOP
+        // Top
+
         _letterOffsetY = _contentSize.height;
         if (_vAlign !== VerticalTextAlignment.TOP) {
             let blank =
@@ -863,10 +896,12 @@ export default class TmpAssembler {
                 _lineHeight * this._getFontScale() -
                 _originFontSize * _bmfontScale;
             if (_vAlign === VerticalTextAlignment.BOTTOM) {
-                // BOTTOM
+                // Bottom
+
                 _letterOffsetY -= blank;
             } else {
-                // CENTER:
+                // Center:
+
                 _letterOffsetY -= blank / 2;
             }
         }
@@ -891,7 +926,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 更新所有顶点数据
+     * Update all vertex data
      */
     private static _updateQuads(): void {
         const renderData = _comp.renderData!;
@@ -972,7 +1007,8 @@ export default class TmpAssembler {
                 );
 
                 quadsIndex++;
-                // 下划线数据记录
+                // Underlined data logging
+
                 if (
                     _extraLineDef &&
                     ((_comp as TextMeshPro).enableUnderline ||
@@ -997,7 +1033,8 @@ export default class TmpAssembler {
         }
 
         if (_extraLineDef) {
-            // 下划线
+            // Underline
+
             if ((_comp as TextMeshPro).enableUnderline) {
                 this._updateLineQuads(
                     appX,
@@ -1006,7 +1043,8 @@ export default class TmpAssembler {
                         (_comp as TextMeshPro).underlineOffset * _bmfontScale
                 );
             }
-            // 删除线
+            // Delete line
+
             if ((_comp as TextMeshPro).enableStrikethrough) {
                 this._updateLineQuads(
                     appX,
@@ -1045,7 +1083,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 更新下划线、删除线的顶点数据
+     * Update vertex data of underscores and deleted lines
      */
     private static _updateLineQuads(
         appx: number,
@@ -1077,7 +1115,8 @@ export default class TmpAssembler {
             let rightX = leftX + wLeft + wMid;
             let midX = leftX + wLeft;
 
-            // 左
+            // left
+
             _tmpUvRect.height = _extraLineDef.h;
             _tmpUvRect.width = wLeft / _bmfontScale;
             _tmpUvRect.x = _extraLineDef.u;
@@ -1121,7 +1160,8 @@ export default class TmpAssembler {
                 );
             }
 
-            // 右
+            // right
+
             _tmpUvRect.width = wRight / _bmfontScale;
             _tmpUvRect.x = _extraLineDef.u + _extraLineDef.w - _tmpUvRect.width;
 
@@ -1138,7 +1178,8 @@ export default class TmpAssembler {
                 );
             }
 
-            // 中
+            // middle
+
             if (wMid > 0) {
                 _tmpUvRect.width = _extraLineDef.w - (wLeft * 2) / _bmfontScale;
                 _tmpUvRect.x = _extraLineDef.u + _tmpUvRect.width;
@@ -1160,11 +1201,11 @@ export default class TmpAssembler {
     }
 
     /**
-     * 添加一组顶点数据（4个顶点）
+     * Add a set of vertex data (4 vertices)
      * @param comp
-     * @param textureId 渲染的字符所需纹理id
-     * @param uvRect 顶点uv数据
-     * @param posRect 顶点坐标数据
+     * @param textureId The texture id required for rendering characters
+     * @param uvRect Vertex uv data
+     * @param posRect Vertex coordinate data
      */
     private static appendQuad(
         comp: TextMeshPro,
@@ -1177,7 +1218,8 @@ export default class TmpAssembler {
             return;
         }
 
-        // 此处会将renderData.chunk.vb置0
+        // Here, render data.chunk.vb will be set to 0
+
         const dataOffset = renderData.dataLength;
         renderData.dataLength += 4;
         renderData.resize(
@@ -1193,7 +1235,8 @@ export default class TmpAssembler {
             rectHeight = uvRect.height;
 
         let l, b, r, t;
-        // uvs
+        // UVS
+
         l = uvRect.x / texw;
         r = (uvRect.x + rectWidth) / texw;
         b = (uvRect.y + rectHeight) / texh;
@@ -1207,19 +1250,22 @@ export default class TmpAssembler {
         dataList[dataOffset + 3].u = r;
         dataList[dataOffset + 3].v = t;
 
-        // positions
+        // Positions
+
         l = posRect.x;
         r = posRect.x + posRect.width;
         b = posRect.y - posRect.height;
         t = posRect.y;
         this.appendVerts(comp, dataList, dataOffset, l, r, b, t);
 
-        // colorExtra
+        // Color extra
+
         for (let i = 0; i < 4; i++) {
             dataList[dataOffset + i]["colorExtra"] = WHITE.clone();
         }
 
-        // textureId
+        // Texture id
+
         for (let i = 0; i < 4; i++) {
             dataList[dataOffset + i]["textureIdx"] = textureId;
         }
@@ -1263,7 +1309,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 更新额外顶点颜色，不对下划线、删除线生效
+     * Updated additional vertex colors, not taking effect on underscores or deleted lines
      */
     public static updateColorExtra(comp: TextMeshPro): void {
         const dataList = comp.renderData.data;
@@ -1274,33 +1320,55 @@ export default class TmpAssembler {
         if (!JSB) {
             for (let i = 0; i < comp.lettersInfo.length; i++) {
                 let info = comp.lettersInfo[i];
+
                 if (!info.valid || TmpUtils.isUnicodeSpace(info.char)) {
                     continue;
                 }
-                let alpha = info.visible ? 1 : 0;
+
+                let alpha = info.visible ? 255 : 0;
                 let offset = info.quadsIndex * 4;
                 if (dataList.length < offset + 4) {
                     break;
                 }
-                tempColor.set(WHITE);
-                tempColor.a *= alpha;
-                comp.vertexColorGradient && tempColor.multiply(comp.colorLB);
-                dataList[offset]["colorExtra"].set(tempColor);
+                // setting vertex gradient colors
 
-                tempColor.set(WHITE);
-                tempColor.a *= alpha;
-                comp.vertexColorGradient && tempColor.multiply(comp.colorRB);
-                dataList[offset + 1]["colorExtra"].set(tempColor);
+                if (comp.vertexColorGradient) {
+                    tempColor.set(255, 255, 255, alpha);
+                    console.log(tempColor);
+                    tempColor.multiply(comp.colorLB);
+                    dataList[offset]["colorExtra"].set(tempColor);
 
-                tempColor.set(WHITE);
-                tempColor.a *= alpha;
-                comp.vertexColorGradient && tempColor.multiply(comp.colorLT);
-                dataList[offset + 2]["colorExtra"].set(tempColor);
+                    tempColor.set(255, 255, 255, alpha);
+                    tempColor.multiply(comp.colorRB);
+                    dataList[offset + 1]["colorExtra"].set(tempColor);
 
-                tempColor.set(WHITE);
-                tempColor.a *= alpha;
-                comp.vertexColorGradient && tempColor.multiply(comp.colorRT);
-                dataList[offset + 3]["colorExtra"].set(tempColor);
+                    tempColor.set(255, 255, 255, alpha);
+                    tempColor.multiply(comp.colorLT);
+                    dataList[offset + 2]["colorExtra"].set(tempColor);
+
+                    tempColor.set(255, 255, 255, alpha);
+                    tempColor.multiply(comp.colorRT);
+                    dataList[offset + 3]["colorExtra"].set(tempColor);
+                }
+
+                // setting linear gradient colors
+
+                if (comp.linearGradientOptions.linearColorGradient) {
+                    const colorCodedGlyphBounds = {} as IColorLike;
+                    colorCodedGlyphBounds.r = dataList[offset]["u"];
+                    colorCodedGlyphBounds.g = dataList[offset]["v"];
+                    colorCodedGlyphBounds.b = dataList[offset + 3]["u"];
+                    colorCodedGlyphBounds.a = dataList[offset + 3]["v"];
+
+                    /** storing to global var cuz we dont want to
+                     *  distorb floats by converting
+                     * it to uint8(Color.rgba) and back to float in this.fillbuffer()
+                     */
+                    _colorlikeCodedUVs[offset] = colorCodedGlyphBounds;
+                    _colorlikeCodedUVs[offset + 1] = colorCodedGlyphBounds;
+                    _colorlikeCodedUVs[offset + 2] = colorCodedGlyphBounds;
+                    _colorlikeCodedUVs[offset + 3] = colorCodedGlyphBounds;
+                }
             }
         } else {
             const renderData = comp.renderData!;
@@ -1379,10 +1447,10 @@ export default class TmpAssembler {
         }
     }
 
-    //#region 顶点数据操作接口
+    //#region Vertex data operation interface
 
     /**
-     * 根据字符下标判断此字符是否可见
+     * Determine whether this character is visible based on the character subscript
      */
     public static isVisble(comp: TextMeshPro, index: number): boolean {
         let info = comp.lettersInfo[index];
@@ -1395,7 +1463,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 根据字符下标设置字符是否可见
+     * Set whether the character is visible according to the character subscript
      */
     public static setVisible(
         comp: TextMeshPro,
@@ -1460,7 +1528,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 根据字符下标获取颜色顶点数据，顺序为[左下, 右下, 左上, 右上]
+     * Get color vertex data according to character subscript, in the order [lower left, lower right, upper left, upper right]
      */
     public static getColorExtraVertices(
         comp: TextMeshPro,
@@ -1486,7 +1554,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 根据字符下标设置颜色顶点数据，顺序为[左下, 右下, 左上, 右上]
+     * Set color vertex data according to character subscript, in the order of [lower left, lower right, upper left, upper right]
      */
     public static setColorExtraVertices(
         comp: TextMeshPro,
@@ -1532,7 +1600,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 根据字符下标获取坐标顶点数据，顺序为[左下, 右下, 左上, 右上]
+     * Get coordinate vertex data according to character subscript, in the order [lower left, lower right, upper left, upper right]
      */
     public static getPosVertices(
         comp: TextMeshPro,
@@ -1563,7 +1631,7 @@ export default class TmpAssembler {
     }
 
     /**
-     * 根据字符下标设置坐标顶点数据，顺序为[左下, 右下, 左上, 右上]
+     * Set the coordinate vertex data according to the character subscript, in the order of [lower left, lower right, upper left, upper right]
      */
     public static setPosVertices(
         comp: TextMeshPro,

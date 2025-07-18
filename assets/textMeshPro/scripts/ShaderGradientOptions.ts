@@ -8,7 +8,8 @@ import {
     Prefab,
     CCFloat,
     math,
-    v3
+    v3,
+    log
 } from "cc";
 import TextMeshPro from "./TextMeshPro";
 import TmpUtils from "./utils/TmpUtils";
@@ -104,6 +105,7 @@ export class LinearGradientOptions {
     })
     public set items(value: LinearGradientItem[]) {
         if (value.length < 2) {
+            this._items.length = 2;
             return;
         }
         if (value.length > 5) {

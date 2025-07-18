@@ -10,6 +10,7 @@ import {
     JsonAsset,
     log,
     Material,
+    NodeEventType,
     RenderData,
     renderer,
     SpriteFrame,
@@ -53,35 +54,6 @@ export enum TmpOverflow {
 @ccclass("TmpUniform")
 export class TmpUniform {
     //#region TmpUniform_PROPS
-
-    @property(Color)
-    private _linearGradientOptions: LinearGradientOptions = null;
-    @property({
-        serializable: true,
-        tooltip: "Text body color",
-        type: LinearGradientOptions
-    })
-    public get linearGradientOptions(): LinearGradientOptions {
-        return (
-            this._linearGradientOptions ||
-            (() => {
-                this._linearGradientOptions = new LinearGradientOptions(
-                    this._comp
-                );
-                return this._linearGradientOptions;
-            })()
-        );
-    }
-    public set linearGradientOptions(v: LinearGradientOptions) {
-        if (!EDITOR && this._linearGradientOptions === v) {
-            return;
-        }
-        this._linearGradientOptions = v;
-        if (!this._comp) {
-            return;
-        }
-        this._comp.updateTmpLinearGradient(this._comp.getMaterialInstance(0));
-    }
 
     @property(Color)
     private _faceColor: Color = Color.WHITE.clone();
@@ -443,7 +415,9 @@ export class TmpUniform {
     public get comp(): TextMeshPro {
         return this._comp;
     }
-
+    constructor(text?: TextMeshPro) {
+        if (text) this._comp = text;
+    }
     public init(text: TextMeshPro) {
         this._comp = text;
 
@@ -456,11 +430,58 @@ export class TmpUniform {
 
     //#endregion TmpUniform_PROPS
 }
-
 @ccclass("TextMeshPro")
 @executeInEditMode
 export default class TextMeshPro extends UIRenderer {
     //#region TMP_PROPS
+
+    private _linearGradientOptions: LinearGradientOptions = null;
+    @property({
+        serializable: true,
+        tooltip: "Text body color",
+        type: LinearGradientOptions
+    })
+    public get linearGradientOptions(): LinearGradientOptions {
+        return (
+            this._linearGradientOptions ||
+            (() => {
+                this._linearGradientOptions = new LinearGradientOptions(this);
+                return this._linearGradientOptions;
+            })()
+        );
+    }
+    public set linearGradientOptions(v: LinearGradientOptions) {
+        if (!EDITOR && this._linearGradientOptions === v) {
+            return;
+        }
+        this._linearGradientOptions = v;
+        this.updateTmpLinearGradient(this.getMaterialInstance(0));
+    }
+    protected _color: Color = Color.WHITE.clone();
+    @property({
+        visible() {
+            return !this.linearGradientOptions.linearColorGradient;
+        },
+        type: Color,
+        serializable: true,
+        displayOrder: 1,
+        override: true
+    })
+    get color(): Readonly<Color> {
+        return this._color;
+    }
+    set color(value) {
+        if (this._color.equals(value)) {
+            return;
+        }
+        this._color.set(value);
+        this._updateColor();
+        if (EDITOR) {
+            const clone = this._color.clone();
+            this.node.emit(NodeEventType.COLOR_CHANGED, clone);
+        }
+    }
+
     @property
     private _string: string = "";
     @property({ multiline: true })
@@ -926,7 +947,7 @@ export default class TextMeshPro extends UIRenderer {
         const data = RenderData.add(vfmt);
         data.initRenderDrawInfo(this, drawInfoType);
         this._renderData = data;
-        console.log(data._batcher._staticVBBuffer._buffers);
+        // console.log(data._batcher._staticVBBuffer._buffers);
         return data;
     }
 
@@ -1196,32 +1217,30 @@ export default class TextMeshPro extends UIRenderer {
 
         material.recompileShaders({
             USE_LINEAR_GRADIENT_2:
-                this.tmpUniform.linearGradientOptions.numberOfColors >= 2,
+                this.linearGradientOptions.numberOfColors >= 2,
             USE_LINEAR_GRADIENT_3:
-                this.tmpUniform.linearGradientOptions.numberOfColors >= 3,
+                this.linearGradientOptions.numberOfColors >= 3,
             USE_LINEAR_GRADIENT_4:
-                this.tmpUniform.linearGradientOptions.numberOfColors >= 4,
+                this.linearGradientOptions.numberOfColors >= 4,
             USE_LINEAR_GRADIENT_5:
-                this.tmpUniform.linearGradientOptions.numberOfColors >= 5
+                this.linearGradientOptions.numberOfColors >= 5
         });
-        if (this.tmpUniform.linearGradientOptions.linearColorGradient) {
+        if (this.linearGradientOptions.linearColorGradient) {
             this._updateTmpLinearGradientProps(material);
         }
+        this._colorExtraDirty = true;
     }
 
     private _updateTmpLinearGradientProps(material: renderer.MaterialInstance) {
-        material.setProperty(
-            "gradientAngle",
-            this.tmpUniform.linearGradientOptions.angle
-        );
-        this.tmpUniform.linearGradientOptions.items.forEach((e, i) => {
+        material.setProperty("gradientAngle", this.linearGradientOptions.angle);
+        this.linearGradientOptions.items.forEach((e, i) => {
             material.setProperty(
                 `gradientColor${i + 1}`,
-                this.tmpUniform.linearGradientOptions.items[i].color
+                this.linearGradientOptions.items[i].color
             );
             material.setProperty(
                 `gradientColorRatio${i + 1}`,
-                this.tmpUniform.linearGradientOptions.items[i].colorRatio
+                this.linearGradientOptions.items[i].colorRatio
             );
         });
     }
