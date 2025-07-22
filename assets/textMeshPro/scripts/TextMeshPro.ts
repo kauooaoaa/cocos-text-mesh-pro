@@ -1217,13 +1217,17 @@ export default class TextMeshPro extends UIRenderer {
 
         material.recompileShaders({
             USE_LINEAR_GRADIENT_2:
-                this.linearGradientOptions.numberOfColors >= 2,
+                this.linearGradientOptions.numberOfColors >= 2 &&
+                this.linearGradientOptions.linearColorGradient,
             USE_LINEAR_GRADIENT_3:
-                this.linearGradientOptions.numberOfColors >= 3,
+                this.linearGradientOptions.numberOfColors >= 3 &&
+                this.linearGradientOptions.linearColorGradient,
             USE_LINEAR_GRADIENT_4:
-                this.linearGradientOptions.numberOfColors >= 4,
+                this.linearGradientOptions.numberOfColors >= 4 &&
+                this.linearGradientOptions.linearColorGradient,
             USE_LINEAR_GRADIENT_5:
-                this.linearGradientOptions.numberOfColors >= 5
+                this.linearGradientOptions.numberOfColors >= 5 &&
+                this.linearGradientOptions.linearColorGradient
         });
         if (this.linearGradientOptions.linearColorGradient) {
             this._updateTmpLinearGradientProps(material);

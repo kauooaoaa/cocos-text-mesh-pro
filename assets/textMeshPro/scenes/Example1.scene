@@ -229,8 +229,8 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 6.918000000000006,
-      "y": 181.07999999999998,
+      "x": 6.918,
+      "y": 181.152,
       "z": 0
     },
     "_lrot": {
@@ -296,9 +296,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 189,
-      "g": 55,
-      "b": 55,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
     "_string": "A",
@@ -363,14 +363,14 @@
     "__type__": "TmpUniform",
     "_faceColor": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 87,
+      "g": 76,
+      "b": 76,
       "a": 255
     },
     "_faceDilate": 0.5,
     "_faceSoftness": 0.01,
-    "_enableOutline": true,
+    "_enableOutline": false,
     "_outlineColor": {
       "__type__": "cc.Color",
       "r": 255,

@@ -75,6 +75,7 @@ CCProgram tmp-vs %{
   in float a_texture_idx;
 
   out vec4 color;
+  out vec4 glyphUvsOrBaseColor;
   out vec2 uv0;
   out float texture_idx;
 
@@ -97,7 +98,9 @@ CCProgram tmp-vs %{
     #if SAMPLE_FROM_RT
       CC_HANDLE_RT_SAMPLE_FLIP(uv0);
     #endif
-    color = a_color *a_color2;
+
+    color = a_color2;
+    glyphUvsOrBaseColor = a_color;
     texture_idx = a_texture_idx;
 
     return pos;
@@ -110,11 +113,12 @@ CCProgram tmp-fs %{
   #include <builtin/internal/alpha-test>
 
   in vec4 color;
+  in vec4 glyphUvsOrBaseColor;
   in vec2 uv0;
   in vec3 pos;
   in float texture_idx;
 
-    #if USE_LINEAR_GRADIENT_2 //|| USE_LINEAR_GRADIENT_3 || USE_LINEAR_GRADIENT_4 || USE_LINEAR_GRADIENT_5
+    #if USE_LINEAR_GRADIENT_2 
         uniform GradientColorItem2{
             float gradientColorRatio1;
             float gradientColorRatio2;
@@ -124,13 +128,13 @@ CCProgram tmp-fs %{
             vec4 gradientColor2;
         };
     #endif
-    #if USE_LINEAR_GRADIENT_3 //|| USE_LINEAR_GRADIENT_4 || USE_LINEAR_GRADIENT_5
+    #if USE_LINEAR_GRADIENT_3 
         uniform GradientColorItem3{
             vec4 gradientColor3;
             float gradientColorRatio3;
         };
     #endif
-    #if USE_LINEAR_GRADIENT_4 //|| USE_LINEAR_GRADIENT_5
+    #if USE_LINEAR_GRADIENT_4 
         uniform GradientColorItem4{
             vec4 gradientColor4;
             float gradientColorRatio4;
@@ -270,13 +274,26 @@ CCProgram tmp-fs %{
     float faceValue = 1.0 - faceDilate;
     float faceDistance = smoothstep(faceValue - faceSoftness, faceValue + faceSoftness, curDistance);
     vec4 fragColor = vec4(color.rgb * faceColor.rgb, faceColor.a * faceDistance);
-        
-    // #if USE_LINEAR_GRADIENT_2 
-    // float gradientPosition =clamp((uv0.y) / (1.0), 0.0, 1.0);
-    // vec4 grad = mix(vec4(1,0,0,255),vec4(0,0,255,255),uv0.y);
-    // fragColor.rgb = grad.rgb;
-    // vec4 lastColor;
-    // #endif
+    
+    
+//    #if USE_LINEAR_GRADIENT_2 
+//         fragColor.r=1.0;
+//         fragColor.g=1.0;
+//         fragColor.b=1.0;
+//     #endif
+    
+    #if USE_LINEAR_GRADIENT_2 
+    // vec2 blUv;
+    // blUv.rg = glyphUvsOrBaseColor.rg;
+    vec2 blUv = glyphUvsOrBaseColor.rg;
+    
+    vec2 trUv = glyphUvsOrBaseColor.ba;
+    float gradientPosition =clamp((uv0.y) / (1.0), 0.0, 1.0);
+    
+    vec4 grad = mix(vec4(1,0,0,255),vec4(0,0,255,255),uv0.y);
+    fragColor.rgb = grad.rgb;
+    vec4 lastColor;
+    #endif
     // if (gradientPosition > gradientColorRatio2) {
     //   float t1 = clamp( gradientPosition/ gradientColorRatio2, 0.0, 1.0);
     //   fragColor = mix(gradientColor1, gradientColor2, t1);
@@ -342,4 +359,10 @@ CCProgram tmp-fs %{
     ALPHA_TEST(fragColor);
     return fragColor;
   }
+  vec2 angleToUnitVector(float angleInRadians) {
+    return vec2(cos(angleInRadians), sin(angleInRadians));
+    }
+  float unlerp(float value, float a, float b) {
+    return (value - a) / (b - a);
+}
 }%
