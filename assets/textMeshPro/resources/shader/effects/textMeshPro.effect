@@ -289,12 +289,6 @@ vec4 frag() {
     float faceDistance = smoothstep(faceValue - faceSoftness, faceValue + faceSoftness, curDistance);
     vec4 fragColor = vec4(color.rgb * faceColor.rgb, faceColor.a * faceDistance);
     
-    //    #if USE_LINEAR_GRADIENT_2 
-    //         fragColor.r=1.0;
-    //         fragColor.g=1.0;
-    //         fragColor.b=1.0;
-    //     #endif
-    
     #if USE_LINEAR_GRADIENT_2
         
         vec2 normalizedAngle = vec2(cos(gradientAngle),sin(gradientAngle));
@@ -303,31 +297,25 @@ vec4 frag() {
         vec2 localUvWithinCurrentGlyph = vec2(0, unlerp(uv0.y, trUv.y,blUv.y));
         vec2 scaledAngle = vec2(0,0);
         
-            localUvWithinCurrentGlyph.x = unlerp(uv0.x,blUv.x,trUv.x );
+        if(normalizedAngle.x > 0.0){
+            localUvWithinCurrentGlyph.x = unlerp(uv0.x,blUv.x, trUv.x);
             scaledAngle = normalizedAngle * projectionRelativeLength(normalizedAngle,vec2(1,1));
-            // scaledAngle = normalizedAngle * dot(normalizedAngle,vec2(1,1));
-        // if(normalizedAngle.x > 0.0){
-        //     localUvWithinCurrentGlyph.x = unlerp(uv0.x,blUv.x, trUv.x);
-        //     scaledAngle = normalizedAngle * dot(normalizedAngle,vec2(1,1));
-        // }else{
-        //     normalizedAngle.y *=-1.0;
-        //     localUvWithinCurrentGlyph.x = 1.0-unlerp(uv0.x,blUv.x, trUv.x);
-        //     scaledAngle = normalizedAngle * dot(normalizedAngle,vec2(-1,1));
-        // }
+        }else{
+            localUvWithinCurrentGlyph.x = -(1.0-unlerp(uv0.x,blUv.x, trUv.x));
+            scaledAngle = normalizedAngle * projectionRelativeLength(normalizedAngle,vec2(-1,1));
+        }
         
         float gradPosition = projectionRelativeLength(scaledAngle,localUvWithinCurrentGlyph);
-        // float gradPosition = dot(normalizedAngle,localUvWithinCurrentGlyph);
-        
-        // vec3 black = vec3(0, 0, 0);
-        // vec3 white = vec3(1, 1, 1);
-        // vec3 grad = vec3(mix(black, white, gradPosition)).rgb;
-        if(gradPosition < 0.49){
-            fragColor.rgb = vec3(0,1,0);
-        } else if(gradPosition < 0.51){
-            fragColor.rgb = vec3(1,1,0);
-        } else {
-            fragColor.rgb = vec3(1,0,0);
-        }
+        vec3 black = vec3(0, 0, 0);
+        vec3 white = vec3(1, 1, 1);
+        fragColor.rgb = mix(black, white, gradPosition).rgb;
+        // if(gradPosition < 0.49){
+        //     fragColor.rgb = vec3(0,1,0);
+        // } else if(gradPosition < 0.51){
+        //     fragColor.rgb = vec3(1,1,0);
+        // } else {
+        //     fragColor.rgb = vec3(1,0,0);
+        // }
         vec4 lastColor;
     #endif
     // if (gradientPosition > gradientColorRatio2) {
