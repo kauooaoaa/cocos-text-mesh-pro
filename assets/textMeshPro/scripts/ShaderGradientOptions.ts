@@ -58,6 +58,7 @@ export class LinearGradientOptions {
     @property({
         type: CCFloat,
         radian: true,
+        range: [0, 180, 1],
         serializable: true,
         visible() {
             return this._linearGradient;

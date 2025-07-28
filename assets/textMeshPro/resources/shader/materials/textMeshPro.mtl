@@ -12,6 +12,9 @@
   "_defines": [
     {
       "USE_LINEAR_GRADIENT_2": true,
+      "USE_LINEAR_GRADIENT_3": true,
+      "USE_LINEAR_GRADIENT_4": true,
+      "USE_LINEAR_GRADIENT_5": true,
       "USE_TEXTURE_LEVEL_1": true,
       "USE_TEXTURE_LEVEL_2": true,
       "USE_TEXTURE_LEVEL_3": true,
