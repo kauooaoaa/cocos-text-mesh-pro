@@ -57,29 +57,26 @@ export class LinearGradientOptions {
     protected _direction: Vec3 = new Vec3(1, 0, 0);
     @property({
         type: CCFloat,
+        radian: true,
         serializable: true,
         visible() {
             return this._linearGradient;
         }
     })
     get angle() {
-        return math.toDegree(
-            Vec3.signedAngle(Vec3.RIGHT, this._direction, v3(0, 0, 1))
-        );
+        return Vec3.signedAngle(Vec3.RIGHT, this._direction, v3(0, 0, 1));
     }
     set angle(n: number) {
-        this._direction = Vec3.normalize(
+        Vec3.rotateZ(
             this._direction,
-            Vec3.rotateZ(
-                this._direction,
-                v3(1, 0, 0),
-                v3(0, 0, 0),
-                math.toRadian(n)
-            )
+            v3(1, 0, 0),
+            v3(0, 0, 0),
+            // math.toRadian(n)
+            n
         );
     }
     get angleRadian() {
-        return Vec3.angle(Vec3.RIGHT, this._direction);
+        return Vec3.angle(v3(1, 0, 0), this._direction);
     }
 
     get numberOfColors() {

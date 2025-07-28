@@ -176,7 +176,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 1123.609022556391,
+    "_orthoHeight": 686.5727699530516,
     "_near": 0,
     "_far": 2000,
     "_color": {
@@ -229,8 +229,8 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 6.918,
-      "y": 181.152,
+      "x": 312.152,
+      "y": 285.897,
       "z": 0
     },
     "_lrot": {
@@ -268,8 +268,8 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 37.89,
-      "height": 76.2
+      "width": 39.3,
+      "height": 72.65
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -301,16 +301,16 @@
       "b": 255,
       "a": 255
     },
-    "_string": "A",
+    "_string": "W",
     "_font": {
       "__uuid__": "49b9818d-15a3-49d0-b2da-6d02ce47cc60",
       "__expectedType__": "cc.JsonAsset"
     },
     "_horizontalAlign": 1,
     "_verticalAlign": 0,
-    "_actualFontSize": 63.15,
-    "_fontSize": 63.15,
-    "_lineHeight": 76.2,
+    "_actualFontSize": 65.5,
+    "_fontSize": 65.5,
+    "_lineHeight": 72.65,
     "_spacingX": 0,
     "_overflow": 0,
     "_enableWrapText": true,
@@ -379,20 +379,20 @@
       "a": 255
     },
     "_outlineThickness": 0.1,
-    "_enableUnderlay": false,
+    "_enableUnderlay": true,
     "_underlayColor": {
       "__type__": "cc.Color",
-      "r": 0,
-      "g": 0,
-      "b": 0,
+      "r": 72,
+      "g": 69,
+      "b": 156,
       "a": 255
     },
     "_underlayOffset": {
       "__type__": "cc.Vec2",
-      "x": 0,
+      "x": 0.005,
       "y": 0
     },
-    "_underlayDilate": 0.5,
+    "_underlayDilate": 1,
     "_underlaySoftness": 0.1,
     "_enableGlow": false,
     "_glowColor": {

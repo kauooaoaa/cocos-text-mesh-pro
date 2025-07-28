@@ -11,6 +11,7 @@
   "_techIdx": 0,
   "_defines": [
     {
+      "USE_LINEAR_GRADIENT_2": true,
       "USE_TEXTURE_LEVEL_1": true,
       "USE_TEXTURE_LEVEL_2": true,
       "USE_TEXTURE_LEVEL_3": true,
@@ -48,6 +49,9 @@
         "__uuid__": "dd8f2b59-403b-45aa-b90b-7a60c424031f@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
+      "gradientColorRatio1": 0.65,
+      "gradientColorRatio2": 1.4,
+      "gradientAngle": 1.57,
       "faceColor": {
         "__type__": "cc.Color",
         "r": 151,
