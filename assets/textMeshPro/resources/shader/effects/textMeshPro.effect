@@ -60,239 +60,245 @@ CCEffect %{
 }%
 #version 
 CCProgram tmp-vs %{
-  precision highp float;
-  #include <builtin/uniforms/cc-global>
-  #if USE_LOCAL
+precision highp float;
+#include <builtin/uniforms/cc-global>
+#if USE_LOCAL
     #include <builtin/uniforms/cc-local>
-  #endif
-  #if SAMPLE_FROM_RT
+#endif
+#if SAMPLE_FROM_RT
     #include <common/common-define>
-  #endif
-  in vec3 a_position;
-  in vec2 a_texCoord;
-  in vec4 a_color;
-  in vec4 a_color2;
-  in float a_texture_idx;
+#endif
+in vec3 a_position;
+in vec2 a_texCoord;
+in vec4 a_color;
+in vec4 a_color2;
+in float a_texture_idx;
 
-  out vec4 color;
-  out vec4 glyphUvsOrBaseColor;
-  out vec2 uv0;
-  out float texture_idx;
+out vec4 color;
+out vec4 glyphUvsOrBaseColor;
+out vec2 uv0;
+out float texture_idx;
 
-  vec4 vert () {
+vec4 vert() {
     vec4 pos = vec4(a_position, 1);
-
+    
     #if USE_LOCAL
-      pos = cc_matWorld * pos;
+        pos = cc_matWorld * pos;
     #endif
-
+    
     #if USE_PIXEL_ALIGNMENT
-      pos = cc_matView * pos;
-      pos.xyz = floor(pos.xyz);
-      pos = cc_matProj * pos;
+        pos = cc_matView * pos;
+        pos.xyz = floor(pos.xyz);
+        pos = cc_matProj * pos;
     #else
-      pos = cc_matViewProj * pos;
+        pos = cc_matViewProj * pos;
     #endif
-
+    
     uv0 = a_texCoord;
     #if SAMPLE_FROM_RT
-      CC_HANDLE_RT_SAMPLE_FLIP(uv0);
+        CC_HANDLE_RT_SAMPLE_FLIP(uv0);
     #endif
-
+    
     color = a_color2;
     glyphUvsOrBaseColor = a_color;
     texture_idx = a_texture_idx;
-
+    
     return pos;
-  }
+}
 }%
 
+vec2 angleToUnitVector(float angleInRadians) {
+return vec2(cos(angleInRadians), sin(angleInRadians));
+}
 CCProgram tmp-fs %{
-  precision highp float;
-  #include <builtin/internal/embedded-alpha>
-  #include <builtin/internal/alpha-test>
+precision highp float;
+#include <builtin/internal/embedded-alpha>
+#include <builtin/internal/alpha-test>
 
-  in vec4 color;
-  in vec4 glyphUvsOrBaseColor;
-  in vec2 uv0;
-  in vec3 pos;
-  in float texture_idx;
+in vec4 color;
+in vec4 glyphUvsOrBaseColor;
+in vec2 uv0;
+in vec3 pos;
+in float texture_idx;
 
-    #if USE_LINEAR_GRADIENT_2 
-        uniform GradientColorItem2{
-            float gradientColorRatio1;
-            float gradientColorRatio2;
-            float gradientAngle;
-            float padding;
-            vec4 gradientColor1;
-            vec4 gradientColor2;
-        };
-    #endif
-    #if USE_LINEAR_GRADIENT_3 
-        uniform GradientColorItem3{
-            vec4 gradientColor3;
-            float gradientColorRatio3;
-        };
-    #endif
-    #if USE_LINEAR_GRADIENT_4 
-        uniform GradientColorItem4{
-            vec4 gradientColor4;
-            float gradientColorRatio4;
-        };
-    #endif
-    #if USE_LINEAR_GRADIENT_5
-        uniform GradientColorItem5{
-            vec4 gradientColor5;
-            float gradientColorRatio5;
-        };
-    #endif
-  
-  #if USE_TEXTURE_LEVEL_1
+#if USE_LINEAR_GRADIENT_2
+    uniform GradientColorItem2 {
+        float gradientColorRatio1;
+        float gradientColorRatio2;
+        float gradientAngle;
+        float padding;
+        vec4 gradientColor1;
+        vec4 gradientColor2;
+    };
+#endif
+#if USE_LINEAR_GRADIENT_3
+    uniform GradientColorItem3 {
+        vec4 gradientColor3;
+        float gradientColorRatio3;
+    };
+#endif
+#if USE_LINEAR_GRADIENT_4
+    uniform GradientColorItem4 {
+        vec4 gradientColor4;
+        float gradientColorRatio4;
+    };
+#endif
+#if USE_LINEAR_GRADIENT_5
+    uniform GradientColorItem5 {
+        vec4 gradientColor5;
+        float gradientColorRatio5;
+    };
+#endif
+
+#if USE_TEXTURE_LEVEL_1
     uniform sampler2D texture0;
-  #endif
-  #if USE_TEXTURE_LEVEL_2
+#endif
+#if USE_TEXTURE_LEVEL_2
     uniform sampler2D texture1;
-  #endif
-  #if USE_TEXTURE_LEVEL_3
+#endif
+#if USE_TEXTURE_LEVEL_3
     uniform sampler2D texture2;
     uniform sampler2D texture3;
-  #endif
-  #if USE_TEXTURE_LEVEL_4
+#endif
+#if USE_TEXTURE_LEVEL_4
     uniform sampler2D texture4;
     uniform sampler2D texture5;
     uniform sampler2D texture6;
     uniform sampler2D texture7;
-  #endif
+#endif
 
-  uniform Face {
+uniform Face {
     //Font color will be mixed with vertex color
     vec4 faceColor;
     //The thickness of the font is 0.5. The standard thickness of the font
     float faceDilate;
     //The softness of the font
     float faceSoftness;
-  };
+};
 
-  #if USE_OUTLINE
+#if USE_OUTLINE
     uniform Outline {
-      //The stroke color will be affected by the vertex alpha value
-      vec4 outlineColor;
-      //Stroke thickness
-      float outlineThickness;
+        //The stroke color will be affected by the vertex alpha value
+        vec4 outlineColor;
+        //Stroke thickness
+        float outlineThickness;
     };
-  #endif
+#endif
 
-  #if USE_UNDERLAY
+#if USE_UNDERLAY
     uniform Underlay {
-      //Shadow color will be affected by the vertex alpha value
-      vec4 underlayColor;
-      //Shadow offset
-      float underlayOffsetX;
-      float underlayOffsetY;
-      //Shadow thickness
-      float underlayDilate;
-      //Shadow softness
-      float underlaySoftness;
+        //Shadow color will be affected by the vertex alpha value
+        vec4 underlayColor;
+        //Shadow offset
+        float underlayOffsetX;
+        float underlayOffsetY;
+        //Shadow thickness
+        float underlayDilate;
+        //Shadow softness
+        float underlaySoftness;
     };
-  #endif
+#endif
 
-  #if USE_GLOW
+#if USE_GLOW
     uniform Glow {
-      //The glow color will be affected by the vertex alpha value
-      vec4 glowColor;
-      //Glow offset
-      float glowOffset;
-      //The thickness of the glow towards the interior
-      float glowInner;
-      //The thickness of the glow towards the outside
-      float glowOuter;
-      //Glow intensity The glow intensity is the largest when the value is 1. The smaller the value, the greater the glow attenuation coefficient.
-      float glowPower;
+        //The glow color will be affected by the vertex alpha value
+        vec4 glowColor;
+        //Glow offset
+        float glowOffset;
+        //The thickness of the glow towards the interior
+        float glowInner;
+        //The thickness of the glow towards the outside
+        float glowOuter;
+        //Glow intensity The glow intensity is the largest when the value is 1. The smaller the value, the greater the glow attenuation coefficient.
+        float glowPower;
     };
-  #endif
+#endif
 
-  vec4 frag () {
+float unlerp(float value, float lower, float higher) {
+    float ret = (value - lower) / (higher - lower);
+    return ret;
+}
+
+vec4 frag() {
     float curDistance = 0.0;
-
+    
     #if USE_UNDERLAY
-      float underlayDistance = 0.0;
+        float underlayDistance = 0.0;
     #endif
-
+    
     #if USE_TEXTURE_LEVEL_1
-      if (texture_idx <= 0.0) {
-        curDistance = CCSampleWithAlphaSeparated(texture0, uv0).a;
-        #if USE_UNDERLAY
-          underlayDistance = CCSampleWithAlphaSeparated(texture0, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-        #endif
-      }
+        if (texture_idx <= 0.0) {
+            curDistance = CCSampleWithAlphaSeparated(texture0, uv0).a;
+            #if USE_UNDERLAY
+                underlayDistance = CCSampleWithAlphaSeparated(texture0, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #endif
+        }
     #endif
     #if USE_TEXTURE_LEVEL_2
-      else if (texture_idx <= 1.0) {
-        curDistance = CCSampleWithAlphaSeparated(texture1, uv0).a;
-        #if USE_UNDERLAY
-          underlayDistance = CCSampleWithAlphaSeparated(texture1, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-        #endif
-      }
+        else if (texture_idx <= 1.0) {
+            curDistance = CCSampleWithAlphaSeparated(texture1, uv0).a;
+            #if USE_UNDERLAY
+                underlayDistance = CCSampleWithAlphaSeparated(texture1, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #endif
+        }
     #endif
     #if USE_TEXTURE_LEVEL_3
-      else if (texture_idx <= 2.0) {
-        curDistance = CCSampleWithAlphaSeparated(texture2, uv0).a;
-        #if USE_UNDERLAY
-          underlayDistance = CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-        #endif
-      } else if (texture_idx <= 3.0) {
-        curDistance = CCSampleWithAlphaSeparated(texture3, uv0).a;
-        #if USE_UNDERLAY
-          underlayDistance = CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-        #endif
-      }
+        else if (texture_idx <= 2.0) {
+            curDistance = CCSampleWithAlphaSeparated(texture2, uv0).a;
+            #if USE_UNDERLAY
+                underlayDistance = CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #endif
+        } else if (texture_idx <= 3.0) {
+            curDistance = CCSampleWithAlphaSeparated(texture3, uv0).a;
+            #if USE_UNDERLAY
+                underlayDistance = CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #endif
+        }
     #endif
     #if USE_TEXTURE_LEVEL_4
-      else if (texture_idx <= 4.0) {
-        curDistance = CCSampleWithAlphaSeparated(texture4, uv0).a;
-        #if USE_UNDERLAY
-          underlayDistance = CCSampleWithAlphaSeparated(texture4, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-        #endif
-      } else if (texture_idx <= 5.0) {
-        curDistance = CCSampleWithAlphaSeparated(texture5, uv0).a;
-        #if USE_UNDERLAY
-          underlayDistance = CCSampleWithAlphaSeparated(texture5, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-        #endif
-      } else if (texture_idx <= 6.0) {
-        curDistance = CCSampleWithAlphaSeparated(texture6, uv0).a;
-        #if USE_UNDERLAY
-          underlayDistance = CCSampleWithAlphaSeparated(texture6, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-        #endif
-      } else if (texture_idx <= 7.0) {
-        curDistance = CCSampleWithAlphaSeparated(texture7, uv0).a;
-        #if USE_UNDERLAY
-          underlayDistance = CCSampleWithAlphaSeparated(texture7, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-        #endif
-      }
+        else if (texture_idx <= 4.0) {
+            curDistance = CCSampleWithAlphaSeparated(texture4, uv0).a;
+            #if USE_UNDERLAY
+                underlayDistance = CCSampleWithAlphaSeparated(texture4, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #endif
+        } else if (texture_idx <= 5.0) {
+            curDistance = CCSampleWithAlphaSeparated(texture5, uv0).a;
+            #if USE_UNDERLAY
+                underlayDistance = CCSampleWithAlphaSeparated(texture5, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #endif
+        } else if (texture_idx <= 6.0) {
+            curDistance = CCSampleWithAlphaSeparated(texture6, uv0).a;
+            #if USE_UNDERLAY
+                underlayDistance = CCSampleWithAlphaSeparated(texture6, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #endif
+        } else if (texture_idx <= 7.0) {
+            curDistance = CCSampleWithAlphaSeparated(texture7, uv0).a;
+            #if USE_UNDERLAY
+                underlayDistance = CCSampleWithAlphaSeparated(texture7, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #endif
+        }
     #endif
-
+    
     float faceValue = 1.0 - faceDilate;
     float faceDistance = smoothstep(faceValue - faceSoftness, faceValue + faceSoftness, curDistance);
     vec4 fragColor = vec4(color.rgb * faceColor.rgb, faceColor.a * faceDistance);
     
+    //    #if USE_LINEAR_GRADIENT_2 
+    //         fragColor.r=1.0;
+    //         fragColor.g=1.0;
+    //         fragColor.b=1.0;
+    //     #endif
     
-//    #if USE_LINEAR_GRADIENT_2 
-//         fragColor.r=1.0;
-//         fragColor.g=1.0;
-//         fragColor.b=1.0;
-//     #endif
-    
-    #if USE_LINEAR_GRADIENT_2 
-    // vec2 blUv;
-    // blUv.rg = glyphUvsOrBaseColor.rg;
-    vec2 blUv = glyphUvsOrBaseColor.rg;
-    
-    vec2 trUv = glyphUvsOrBaseColor.ba;
-    float gradientPosition =clamp((uv0.y) / (1.0), 0.0, 1.0);
-    
-    vec4 grad = mix(vec4(1,0,0,255),vec4(0,0,255,255),uv0.y);
-    fragColor.rgb = grad.rgb;
-    vec4 lastColor;
+    #if USE_LINEAR_GRADIENT_2
+        vec2 blUv = glyphUvsOrBaseColor.rg;
+        vec2 trUv = glyphUvsOrBaseColor.ba;
+        vec2 localUvWithinCurrentGlyph = vec2(unlerp(uv0.x, blUv.x, trUv.x), unlerp(uv0.y, blUv.y, trUv.y));
+        
+        vec3 black = vec3(0, 0, 0);
+        vec3 white = vec3(1, 1, 1);
+        vec3 grad = vec3(mix(black, white, localUvWithinCurrentGlyph.y)).rgb;
+        fragColor.rgb = grad.rgb;
+        vec4 lastColor;
     #endif
     // if (gradientPosition > gradientColorRatio2) {
     //   float t1 = clamp( gradientPosition/ gradientColorRatio2, 0.0, 1.0);
@@ -327,42 +333,35 @@ CCProgram tmp-fs %{
     // }
     // #endif
     #if USE_OUTLINE
-      float outEdge1 = faceValue - outlineThickness;
-      float outEdge2 = faceValue;
-      float outlineDistance = smoothstep(outEdge1 - faceSoftness, outEdge1 + faceSoftness, curDistance) - smoothstep(outEdge2 - faceSoftness, outEdge2 + faceSoftness, curDistance);
-      float faceClip = step(0.001, faceColor.a);
-      float outClip = step(0.001, outlineColor.a);
-      fragColor.rgb = color.rgb * faceColor.rgb * faceDistance * faceClip + outlineColor.rgb * outlineDistance * outClip;
-      fragColor.a = faceColor.a * faceDistance + outlineColor.a * outlineDistance;
+        float outEdge1 = faceValue - outlineThickness;
+        float outEdge2 = faceValue;
+        float outlineDistance = smoothstep(outEdge1 - faceSoftness, outEdge1 + faceSoftness, curDistance) - smoothstep(outEdge2 - faceSoftness, outEdge2 + faceSoftness, curDistance);
+        float faceClip = step(0.001, faceColor.a);
+        float outClip = step(0.001, outlineColor.a);
+        fragColor.rgb = color.rgb * faceColor.rgb * faceDistance * faceClip + outlineColor.rgb * outlineDistance * outClip;
+        fragColor.a = faceColor.a * faceDistance + outlineColor.a * outlineDistance;
     #endif
-
+    
     #if USE_UNDERLAY
-      float underlayValue = 1.0 - underlayDilate;
-      float underlayAlpha = smoothstep(underlayValue - underlaySoftness, underlayValue + underlaySoftness, underlayDistance);
-      vec4 finalUnderlayColor = vec4(underlayColor.rgb, underlayAlpha * underlayColor.a);
-      if (fragColor.a < 1.0 && finalUnderlayColor.a > 0.0) {
-        fragColor.rgb *= fragColor.a;
-        fragColor += finalUnderlayColor * (1.0 - fragColor.a);
-      }
+        float underlayValue = 1.0 - underlayDilate;
+        float underlayAlpha = smoothstep(underlayValue - underlaySoftness, underlayValue + underlaySoftness, underlayDistance);
+        vec4 finalUnderlayColor = vec4(underlayColor.rgb, underlayAlpha * underlayColor.a);
+        if (fragColor.a < 1.0 && finalUnderlayColor.a > 0.0) {
+            fragColor.rgb *= fragColor.a;
+            fragColor += finalUnderlayColor * (1.0 - fragColor.a);
+        }
     #endif
-
+    
     #if USE_GLOW
-      float delta = curDistance - glowOffset;
-      float deltaFactor = step(0.0, delta);
-      float attenuation = pow(abs(delta), glowPower) * 2.0;
-      float alpha = clamp(max(glowInner - attenuation, 0.0) / glowInner, 0.0, 1.0) * deltaFactor + clamp((glowOuter - attenuation) / glowOuter, 0.0, 1.0) * (1.0 - deltaFactor);
-      fragColor += glowColor * glowColor.a * alpha;
+        float delta = curDistance - glowOffset;
+        float deltaFactor = step(0.0, delta);
+        float attenuation = pow(abs(delta), glowPower) * 2.0;
+        float alpha = clamp(max(glowInner - attenuation, 0.0) / glowInner, 0.0, 1.0) * deltaFactor + clamp((glowOuter - attenuation) / glowOuter, 0.0, 1.0) * (1.0 - deltaFactor);
+        fragColor += glowColor * glowColor.a * alpha;
     #endif
-
-    // fragColor.a *= color.a;
-
+    
     ALPHA_TEST(fragColor);
     return fragColor;
-  }
-  vec2 angleToUnitVector(float angleInRadians) {
-    return vec2(cos(angleInRadians), sin(angleInRadians));
-    }
-  float unlerp(float value, float a, float b) {
-    return (value - a) / (b - a);
 }
+
 }%
