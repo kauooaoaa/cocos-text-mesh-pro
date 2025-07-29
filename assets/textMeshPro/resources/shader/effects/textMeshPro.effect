@@ -42,7 +42,10 @@ CCEffect %{
         faceDilate: { value: 0.5, range:[0, 1, 0.01] }
         faceSoftness: { value: 0.02, range:[0, 1, 0.01] }
 
-        outlineColor: { value: [1, 0, 0, 1],  editor: { type: color } }
+        outlineColor1: { value: [1, 0, 1, 1],  editor: { type: color } }
+        outlineColor2: { value: [1, 1, 0, 1],  editor: { type: color } }
+        outlineColor3: { value: [1, 0, 0, 1],  editor: { type: color } }
+        outlineColor4: { value: [1, 0, 0, 1],  editor: { type: color } }
         outlineThickness: { value: 0.1, range:[0, 1, 0.01]}
 
         underlayColor: { value: [0, 0, 0, 1],  editor: { type: color } }
@@ -179,7 +182,10 @@ uniform Face {
 #if USE_OUTLINE
     uniform Outline {
         //The stroke color will be affected by the vertex alpha value
-        vec4 outlineColor;
+        vec4 outlineColor1;
+        vec4 outlineColor2;
+        vec4 outlineColor3;
+        vec4 outlineColor4;
         //Stroke thickness
         float outlineThickness;
     };
@@ -366,16 +372,21 @@ vec4 frag() {
                                                     outEdge2 + faceSoftness,
                                                     curDistance);
             float faceClip = step(0.001, faceColor.a);
-            float outClip = step(0.001, outlineColor.a);
-            // outlineColor.rgb
+            float outClip = step(0.001, outlineColor1.a);
+            float outlineRelativeAspect = unlerp(curDistance,outEdge1,outEdge2);
+            vec4 outlineColor = outlineColor1;
+            if(outlineRelativeAspect>0.5){
+                outlineColor = outlineColor2;
+            }
             fragColor.rgb = color.rgb * fragColor.rgb * faceDistance * faceClip + outlineColor.rgb * outlineDistance * outClip;
-            fragColor.a = faceColor.a * faceDistance + outlineColor.a * outlineDistance;
+            fragColor.a = faceColor.a * faceDistance + outlineColor1.a * outlineDistance;
         #endif
         
         #if USE_UNDERLAY
             float underlayValue = 1.0 - underlayDilate;
             float underlayAlpha = smoothstep(underlayValue - underlaySoftness, underlayValue + underlaySoftness, underlayDistance);
             vec4 finalUnderlayColor = vec4(underlayColor.rgb, underlayAlpha * underlayColor.a);
+            
             if (fragColor.a < 1.0 && finalUnderlayColor.a > 0.0) {
                 fragColor.rgb *= fragColor.a;
                 fragColor += finalUnderlayColor * (1.0 - fragColor.a);
