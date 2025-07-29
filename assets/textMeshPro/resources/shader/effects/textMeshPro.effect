@@ -351,12 +351,23 @@ vec4 frag() {
             fragColor.rgb = lastColor.rgb;
         }
     #endif
+
+        #if USE_VERTEX_GRADIENT
+        fragColor.rgb = mix(fragColor.rgb,color.rgb,color.a);
+        #endif
+
         #if USE_OUTLINE
             float outEdge1 = faceValue - outlineThickness;
             float outEdge2 = faceValue;
-            float outlineDistance = smoothstep(outEdge1 - faceSoftness, outEdge1 + faceSoftness, curDistance) - smoothstep(outEdge2 - faceSoftness, outEdge2 + faceSoftness, curDistance);
+            float outlineDistance = smoothstep( outEdge1 - faceSoftness, 
+                                                outEdge1 + faceSoftness,
+                                                curDistance) 
+                                    - smoothstep(   outEdge2 - faceSoftness,
+                                                    outEdge2 + faceSoftness,
+                                                    curDistance);
             float faceClip = step(0.001, faceColor.a);
             float outClip = step(0.001, outlineColor.a);
+            // outlineColor.rgb
             fragColor.rgb = color.rgb * fragColor.rgb * faceDistance * faceClip + outlineColor.rgb * outlineDistance * outClip;
             fragColor.a = faceColor.a * faceDistance + outlineColor.a * outlineDistance;
         #endif

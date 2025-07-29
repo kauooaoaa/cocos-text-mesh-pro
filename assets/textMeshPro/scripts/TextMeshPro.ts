@@ -25,7 +25,7 @@ import { EDITOR, JSB } from "cc/env";
 import TmpAssembler, { TmpLetterInfo } from "./utils/TmpAssembler";
 import TmpFontConfig from "./utils/TmpFontConfig";
 import TmpUtils from "./utils/TmpUtils";
-import { LinearGradientOptions } from "./ShaderGradientOptions";
+import { LinearGradientOptions } from "./LinearGradientOptions";
 
 const { ccclass, property, executeInEditMode } = _decorator;
 
@@ -741,7 +741,8 @@ export default class TextMeshPro extends UIRenderer {
             return;
         }
         this._vertexColorGradient = v;
-        this._colorExtraDirty = true;
+        this.updateTmpVertexGradient(this.getMaterialInstance(0));
+        this.markForUpdateRenderData();
     }
 
     @property(Color)
@@ -749,8 +750,9 @@ export default class TextMeshPro extends UIRenderer {
     @property({
         tooltip: "Lower left vertex",
         type: Color,
+        serializable: true,
         visible() {
-            return this._colorGradient;
+            return this._vertexColorGradient;
         }
     })
     public get colorLB(): Color {
@@ -769,8 +771,9 @@ export default class TextMeshPro extends UIRenderer {
     @property({
         tooltip: "Lower right vertex",
         type: Color,
+        serializable: true,
         visible() {
-            return this._colorGradient;
+            return this._vertexColorGradient;
         }
     })
     public get colorRB(): Color {
@@ -789,8 +792,9 @@ export default class TextMeshPro extends UIRenderer {
     @property({
         tooltip: "Top left vertex",
         type: Color,
+        serializable: true,
         visible() {
-            return this._colorGradient;
+            return this._vertexColorGradient;
         }
     })
     public get colorLT(): Color {
@@ -809,8 +813,9 @@ export default class TextMeshPro extends UIRenderer {
     @property({
         tooltip: "Upper right vertex",
         type: Color,
+        serializable: true,
         visible() {
-            return this._colorGradient;
+            return this._vertexColorGradient;
         }
     })
     public get colorRT(): Color {
@@ -1195,6 +1200,7 @@ export default class TextMeshPro extends UIRenderer {
         this.updateTmpMatUnderlay(material);
         this.updateTmpMatGlow(material);
         this.updateTmpLinearGradient(material);
+        this.updateTmpVertexGradient(material);
     }
 
     private _updateTmpMatTexture(material: renderer.MaterialInstance): void {
@@ -1237,6 +1243,15 @@ export default class TextMeshPro extends UIRenderer {
         }
         this._colorExtraDirty = true;
     }
+    private updateTmpVertexGradient(material: renderer.MaterialInstance): void {
+        if (!material) {
+            return;
+        }
+
+        material.recompileShaders({
+            USE_VERTEX_GRADIENT: this._vertexColorGradient
+        });
+    }
 
     private _updateTmpLinearGradientProps(material: renderer.MaterialInstance) {
         material.setProperty("gradientAngle", this.linearGradientOptions.angle);
@@ -1267,6 +1282,8 @@ export default class TextMeshPro extends UIRenderer {
 
         material.recompileShaders({
             USE_OUTLINE: this.tmpUniform.enableOutline
+            // USE_OUTLINE_2: this.tmpUniform.enableOutline,
+            // USE_OUTLINE_3: this.tmpUniform.enableOutline
         });
 
         if (this.tmpUniform.enableOutline) {

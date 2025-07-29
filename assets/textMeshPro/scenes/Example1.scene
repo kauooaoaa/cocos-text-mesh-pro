@@ -52,7 +52,7 @@
     },
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 15
+      "__id__": 18
     },
     "_id": "04af3862-7ecd-4ef5-9bb3-68818f9bd8b4"
   },
@@ -75,13 +75,13 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 12
+        "__id__": 15
       },
       {
-        "__id__": 13
+        "__id__": 16
       },
       {
-        "__id__": 14
+        "__id__": 17
       }
     ],
     "_prefab": null,
@@ -173,7 +173,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 547.0324189526185,
+    "_orthoHeight": 547.7153558052435,
     "_near": 0,
     "_far": 2000,
     "_color": {
@@ -265,7 +265,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 513.7,
+      "width": 514.25,
       "height": 80.6
     },
     "_anchorPoint": {
@@ -311,45 +311,45 @@
     "_actualFontSize": 66.5,
     "_fontSize": 66.5,
     "_lineHeight": 80.6,
-    "_spacingX": 6.8,
+    "_spacingX": 6.85,
     "_overflow": 0,
     "_enableWrapText": true,
     "_enableItalic": false,
     "_enableUnderline": false,
     "_underlineOffset": 32.25,
     "_enableStrikethrough": false,
-    "_strikethroughOffset": 23.4,
-    "_vertexColorGradient": true,
+    "_strikethroughOffset": 2.45,
+    "_vertexColorGradient": false,
     "_colorLB": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 0,
-      "b": 0,
-      "a": 255
+      "r": 153,
+      "g": 102,
+      "b": 102,
+      "a": 0
     },
     "_colorRB": {
       "__type__": "cc.Color",
-      "r": 0,
-      "g": 0,
-      "b": 0,
-      "a": 78
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 105
     },
     "_colorLT": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
-      "a": 255
+      "r": 218,
+      "g": 0,
+      "b": 0,
+      "a": 150
     },
     "_colorRT": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 0,
+      "g": 238,
+      "b": 238,
       "a": 255
     },
     "tmpUniform": {
-      "__id__": 11
+      "__id__": 14
     },
     "textures": [
       {
@@ -364,8 +364,8 @@
     "_linearGradient": true,
     "_direction": {
       "__type__": "cc.Vec3",
-      "x": 0.325568154457158,
-      "y": 0.9455185755993164,
+      "x": 0.7313537016191708,
+      "y": 0.6819983600624981,
       "z": 0
     },
     "_items": [
@@ -374,6 +374,15 @@
       },
       {
         "__id__": 10
+      },
+      {
+        "__id__": 11
+      },
+      {
+        "__id__": 12
+      },
+      {
+        "__id__": 13
       }
     ]
   },
@@ -386,7 +395,7 @@
       "b": 0,
       "a": 255
     },
-    "colorRatio": 0.38
+    "colorRatio": 0.2
   },
   {
     "__type__": "LinearGradientItem",
@@ -397,7 +406,40 @@
       "b": 192,
       "a": 255
     },
-    "colorRatio": 0.62
+    "colorRatio": 0.26
+  },
+  {
+    "__type__": "LinearGradientItem",
+    "color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 0,
+      "b": 0,
+      "a": 255
+    },
+    "colorRatio": 0.59
+  },
+  {
+    "__type__": "LinearGradientItem",
+    "color": {
+      "__type__": "cc.Color",
+      "r": 0,
+      "g": 253,
+      "b": 132,
+      "a": 255
+    },
+    "colorRatio": 0.73
+  },
+  {
+    "__type__": "LinearGradientItem",
+    "color": {
+      "__type__": "cc.Color",
+      "r": 160,
+      "g": 160,
+      "b": 160,
+      "a": 255
+    },
+    "colorRatio": 0.83
   },
   {
     "__type__": "TmpUniform",
@@ -408,9 +450,9 @@
       "b": 0,
       "a": 255
     },
-    "_faceDilate": 0.56,
-    "_faceSoftness": 0,
-    "_enableOutline": true,
+    "_faceDilate": 0.97,
+    "_faceSoftness": 0.05,
+    "_enableOutline": false,
     "_outlineColor": {
       "__type__": "cc.Color",
       "r": 255,
@@ -518,28 +560,28 @@
   {
     "__type__": "cc.SceneGlobals",
     "ambient": {
-      "__id__": 16
-    },
-    "shadows": {
-      "__id__": 17
-    },
-    "_skybox": {
-      "__id__": 18
-    },
-    "fog": {
       "__id__": 19
     },
-    "octree": {
+    "shadows": {
       "__id__": 20
     },
-    "skin": {
+    "_skybox": {
       "__id__": 21
     },
-    "lightProbeInfo": {
+    "fog": {
       "__id__": 22
     },
-    "postSettings": {
+    "octree": {
       "__id__": 23
+    },
+    "skin": {
+      "__id__": 24
+    },
+    "lightProbeInfo": {
+      "__id__": 25
+    },
+    "postSettings": {
+      "__id__": 26
     },
     "bakedWithStationaryMainLight": false,
     "bakedWithHighpLightmap": false

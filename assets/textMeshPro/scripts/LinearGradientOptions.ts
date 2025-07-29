@@ -68,13 +68,9 @@ export class LinearGradientOptions {
         return Vec3.signedAngle(Vec3.RIGHT, this._direction, v3(0, 0, 1));
     }
     set angle(n: number) {
-        Vec3.rotateZ(
-            this._direction,
-            v3(1, 0, 0),
-            v3(0, 0, 0),
-            // math.toRadian(n)
-            n
-        );
+        if (n > Math.PI) n = Math.PI;
+        if (n < 0) n = 0;
+        Vec3.rotateZ(this._direction, v3(1, 0, 0), v3(0, 0, 0), n);
     }
     get angleRadian() {
         return Vec3.angle(v3(1, 0, 0), this._direction);
