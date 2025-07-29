@@ -42,10 +42,15 @@ CCEffect %{
         faceDilate: { value: 0.5, range:[0, 1, 0.01] }
         faceSoftness: { value: 0.02, range:[0, 1, 0.01] }
 
-        outlineColor1: { value: [1, 0, 1, 1],  editor: { type: color } }
+        outlineColor1: { value: [0, 1, 0, 1],  editor: { type: color } }
         outlineColor2: { value: [1, 1, 0, 1],  editor: { type: color } }
-        outlineColor3: { value: [1, 0, 0, 1],  editor: { type: color } }
-        outlineColor4: { value: [1, 0, 0, 1],  editor: { type: color } }
+        outlineColor3: { value: [0, 0, 1, 1],  editor: { type: color } }
+        outlineColor4: { value: [1, 1, 1, 1],  editor: { type: color } }
+        outlineColor5: { value: [0, 1, 1, 1],  editor: { type: color } }
+        outlineColorRatio1: { value: 0.2, range:[0, 1, 0.01] }
+        outlineColorRatio2: { value: 0.4, range:[0, 1, 0.01] }
+        outlineColorRatio3: { value: 0.5, range:[0, 1, 0.01] }
+        outlineColorRatio4: { value: 0.6, range:[0, 1, 0.01] }
         outlineThickness: { value: 0.1, range:[0, 1, 0.01]}
 
         underlayColor: { value: [0, 0, 0, 1],  editor: { type: color } }
@@ -186,6 +191,12 @@ uniform Face {
         vec4 outlineColor2;
         vec4 outlineColor3;
         vec4 outlineColor4;
+        vec4 outlineColor5;
+        float outlineColorRatio1;
+        float outlineColorRatio2;
+        float outlineColorRatio3;
+        float outlineColorRatio4;
+        float outlineColorRatio5;
         //Stroke thickness
         float outlineThickness;
     };
@@ -373,11 +384,39 @@ vec4 frag() {
                                                     curDistance);
             float faceClip = step(0.001, faceColor.a);
             float outClip = step(0.001, outlineColor1.a);
-            float outlineRelativeAspect = unlerp(curDistance,outEdge1,outEdge2);
+            float outlineRelativeAspect = clamp(1.0-unlerp(curDistance,outEdge1,outEdge2),0.0,1.0);
             vec4 outlineColor = outlineColor1;
-            if(outlineRelativeAspect>0.5){
-                outlineColor = outlineColor2;
+            // if(outlineRelativeAspect>0.5){
+            //     outlineColor = outlineColor2;
+            // }
+            float AoutlineColorRatio1 = 0.1;
+            float AoutlineColorRatio2 = 0.2;
+            float AoutlineColorRatio3 = 0.3;
+            float AoutlineColorRatio4 = 0.4;
+            float AoutlineColorRatio5 = 0.5;
+
+            if (outlineRelativeAspect < AoutlineColorRatio1) {
+            outlineColor.rgb =outlineColor1.rgb;
+            } else if (outlineRelativeAspect < AoutlineColorRatio2) {
+                outlineColor.rgb =  outlineColor2.rgb;
             }
+            #if USE_LINEAR_GRADIENT_3
+                else if (outlineRelativeAspect < AoutlineColorRatio3) {
+                    outlineColor.rgb =  outlineColor3.rgb;
+                }
+            #endif
+            #if USE_LINEAR_GRADIENT_4
+                else if (outlineRelativeAspect < AoutlineColorRatio4) {
+                    outlineColor.rgb =  outlineColor4.rgb;
+                }
+            #endif
+            #if USE_LINEAR_GRADIENT_5
+                else if (outlineRelativeAspect < 1.0) {
+                    outlineColor.rgb =  outlineColor5.rgb;
+                }
+            #endif
+
+
             fragColor.rgb = color.rgb * fragColor.rgb * faceDistance * faceClip + outlineColor.rgb * outlineDistance * outClip;
             fragColor.a = faceColor.a * faceDistance + outlineColor1.a * outlineDistance;
         #endif

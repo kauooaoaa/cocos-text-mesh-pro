@@ -450,9 +450,9 @@
       "b": 0,
       "a": 255
     },
-    "_faceDilate": 0.97,
-    "_faceSoftness": 0.05,
-    "_enableOutline": false,
+    "_faceDilate": 0.43,
+    "_faceSoftness": 0,
+    "_enableOutline": true,
     "_outlineColor": {
       "__type__": "cc.Color",
       "r": 255,
@@ -460,7 +460,7 @@
       "b": 255,
       "a": 255
     },
-    "_outlineThickness": 0.1,
+    "_outlineThickness": 0.39,
     "_enableUnderlay": false,
     "_underlayColor": {
       "__type__": "cc.Color",
