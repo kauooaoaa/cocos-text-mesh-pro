@@ -26,6 +26,7 @@ import TmpAssembler, { TmpLetterInfo } from "./utils/TmpAssembler";
 import TmpFontConfig from "./utils/TmpFontConfig";
 import TmpUtils from "./utils/TmpUtils";
 import { LinearGradientOptions } from "./LinearGradientOptions";
+import { OutlineOptions } from "./OutlineOptions";
 
 const { ccclass, property, executeInEditMode } = _decorator;
 
@@ -104,69 +105,6 @@ export class TmpUniform {
             return;
         }
         this._comp.updateTmpMatFace(this._comp.getMaterialInstance(0));
-    }
-
-    @property
-    private _enableOutline: boolean = false;
-    @property({ tooltip: "Whether to enable the stroke effect" })
-    public get enableOutline(): boolean {
-        return this._enableOutline;
-    }
-    public set enableOutline(v: boolean) {
-        if (!EDITOR && this._enableOutline === v) {
-            return;
-        }
-        this._enableOutline = v;
-        if (!this._comp) {
-            return;
-        }
-        this._comp.updateTmpMatOutline(this._comp.getMaterialInstance(0));
-    }
-
-    @property(Color)
-    private _outlineColor: Color = color(255, 0, 0, 255);
-    @property({
-        tooltip: "Stroke color",
-        type: Color,
-        visible() {
-            return this._enableOutline;
-        }
-    })
-    public get outlineColor(): Color {
-        return this._outlineColor;
-    }
-    public set outlineColor(v: Color) {
-        if (!EDITOR && this._outlineColor === v) {
-            return;
-        }
-        this._outlineColor = v;
-        if (!this._comp) {
-            return;
-        }
-        this._comp.updateTmpMatOutline(this._comp.getMaterialInstance(0));
-    }
-
-    @property
-    private _outlineThickness: number = 0.1;
-    @property({
-        tooltip: "Stroke thickness",
-        range: [0, 1, 0.01],
-        visible() {
-            return this._enableOutline;
-        }
-    })
-    public get outlineThickness(): number {
-        return this._outlineThickness;
-    }
-    public set outlineThickness(v: number) {
-        if (!EDITOR && this._outlineThickness === v) {
-            return;
-        }
-        this._outlineThickness = v;
-        if (!this._comp) {
-            return;
-        }
-        this._comp.updateTmpMatOutline(this._comp.getMaterialInstance(0));
     }
 
     @property
@@ -423,7 +361,6 @@ export class TmpUniform {
 
         let material = this._comp.getMaterialInstance(0);
         this._comp.updateTmpMatFace(material);
-        this._comp.updateTmpMatOutline(material);
         this._comp.updateTmpMatUnderlay(material);
         this._comp.updateTmpMatGlow(material);
     }
@@ -434,6 +371,28 @@ export class TmpUniform {
 @executeInEditMode
 export default class TextMeshPro extends UIRenderer {
     //#region TMP_PROPS
+
+    @property
+    private _outlineOptions: OutlineOptions = new OutlineOptions(this);
+    @property({
+        tooltip: "Text body color",
+        type: OutlineOptions
+    })
+    public get outlineOptions(): OutlineOptions {
+        return this._outlineOptions;
+        // ||
+        // (() => {
+        //     this._outlineOptions = new OutlineOptions(this);
+        //     return this._outlineOptions;
+        // })()
+    }
+    public set outlineOptions(v: OutlineOptions) {
+        if (!EDITOR && this._outlineOptions === v) {
+            return;
+        }
+        this._outlineOptions = v;
+        this.updateTmpMatOutline(this.getMaterialInstance(0));
+    }
 
     @property({
         serializable: true
@@ -1014,7 +973,7 @@ export default class TextMeshPro extends UIRenderer {
 
         let isMatEqual = true;
         let tmpMatDefine = 0;
-        if (comp.tmpUniform.enableOutline) {
+        if (comp.outlineOptions.isOutlineEnabled) {
             tmpMatDefine |= 1 << 0;
         }
         if (comp.tmpUniform.enableUnderlay) {
@@ -1281,18 +1240,41 @@ export default class TextMeshPro extends UIRenderer {
         }
 
         material.recompileShaders({
-            USE_OUTLINE: this.tmpUniform.enableOutline
-            // USE_OUTLINE_2: this.tmpUniform.enableOutline,
-            // USE_OUTLINE_3: this.tmpUniform.enableOutline
+            USE_OUTLINE: this.outlineOptions.isOutlineEnabled,
+            USE_OUTLINE_2:
+                this.outlineOptions.numberOfColors >= 2 &&
+                this.outlineOptions.isOutlineEnabled,
+            USE_OUTLINE_3:
+                this.outlineOptions.numberOfColors >= 3 &&
+                this.outlineOptions.isOutlineEnabled,
+            USE_OUTLINE_4:
+                this.outlineOptions.numberOfColors >= 4 &&
+                this.outlineOptions.isOutlineEnabled,
+            USE_OUTLINE_5:
+                this.outlineOptions.numberOfColors >= 5 &&
+                this.outlineOptions.isOutlineEnabled
         });
 
-        if (this.tmpUniform.enableOutline) {
-            material.setProperty("outlineColor", this.tmpUniform.outlineColor);
-            material.setProperty(
-                "outlineThickness",
-                this.tmpUniform.outlineThickness
-            );
+        if (this.outlineOptions.isOutlineEnabled) {
+            this._updateTmpOutlineProps(material);
         }
+    }
+    private _updateTmpOutlineProps(material: renderer.MaterialInstance) {
+        material.setProperty(
+            "outlineThickness",
+            this.outlineOptions.outlineThickness
+        );
+
+        this.outlineOptions.colorUnits.forEach((e, i) => {
+            material.setProperty(
+                `outlineColor${i + 1}`,
+                this.outlineOptions.colorUnits[i].color
+            );
+            material.setProperty(
+                `outlineColorRatio${i + 1}`,
+                this.outlineOptions.colorUnits[i].colorRatio
+            );
+        });
     }
 
     public updateTmpMatUnderlay(material: renderer.MaterialInstance): void {

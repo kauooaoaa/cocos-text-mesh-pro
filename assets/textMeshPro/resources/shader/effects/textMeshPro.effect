@@ -384,37 +384,56 @@ vec4 frag() {
                                                     curDistance);
             float faceClip = step(0.001, faceColor.a);
             float outClip = step(0.001, outlineColor1.a);
-            float outlineRelativeAspect = clamp(1.0-unlerp(curDistance,outEdge1,outEdge2),0.0,1.0);
+            float outlineRelativeAspect = clamp(unlerp(curDistance,outEdge1,outEdge2),0.0,1.0);
             vec4 outlineColor = outlineColor1;
-            // if(outlineRelativeAspect>0.5){
-            //     outlineColor = outlineColor2;
-            // }
-            float AoutlineColorRatio1 = 0.1;
-            float AoutlineColorRatio2 = 0.2;
-            float AoutlineColorRatio3 = 0.3;
-            float AoutlineColorRatio4 = 0.4;
-            float AoutlineColorRatio5 = 0.5;
+            // float AoutlineColorRatio1 = 0.1;
+            // float AoutlineColorRatio2 = 0.2;
+            // float AoutlineColorRatio3 = 0.3;
+            // float AoutlineColorRatio4 = 0.4;
+            // float AoutlineColorRatio5 = 0.5;
 
-            if (outlineRelativeAspect < AoutlineColorRatio1) {
+
+
+            if (outlineRelativeAspect < outlineColorRatio1) {
             outlineColor.rgb =outlineColor1.rgb;
-            } else if (outlineRelativeAspect < AoutlineColorRatio2) {
+            }
+            #if USE_OUTLINE_2
+             else if (outlineRelativeAspect < outlineColorRatio2) {
                 outlineColor.rgb =  outlineColor2.rgb;
             }
-            #if USE_LINEAR_GRADIENT_3
-                else if (outlineRelativeAspect < AoutlineColorRatio3) {
+            #endif
+            #if USE_OUTLINE_3
+                else if (outlineRelativeAspect < outlineColorRatio3) {
                     outlineColor.rgb =  outlineColor3.rgb;
                 }
             #endif
-            #if USE_LINEAR_GRADIENT_4
-                else if (outlineRelativeAspect < AoutlineColorRatio4) {
+            #if USE_OUTLINE_4
+                else if (outlineRelativeAspect < outlineColorRatio4) {
                     outlineColor.rgb =  outlineColor4.rgb;
                 }
             #endif
-            #if USE_LINEAR_GRADIENT_5
-                else if (outlineRelativeAspect < 1.0) {
+            #if USE_OUTLINE_5
+                else if (outlineRelativeAspect < outlineColorRatio5){
                     outlineColor.rgb =  outlineColor5.rgb;
                 }
             #endif
+            else {
+                
+                vec4 lastOutlineColor = vec4(outlineColor1.rgb,1);
+                #if USE_OUTLINE_2
+                    lastOutlineColor.rgb = outlineColor2.rgb;
+                #endif 
+                #if USE_OUTLINE_3
+                    lastOutlineColor.rgb = outlineColor3.rgb;
+                #endif 
+                #if USE_OUTLINE_4
+                lastOutlineColor.rgb = outlineColor4.rgb;
+                #endif 
+                #if USE_OUTLINE_5
+                lastOutlineColor.rgb = outlineColor5.rgb;
+                #endif 
+                    outlineColor.rgb =  lastOutlineColor.rgb;
+            }
 
 
             fragColor.rgb = color.rgb * fragColor.rgb * faceDistance * faceClip + outlineColor.rgb * outlineDistance * outClip;

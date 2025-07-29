@@ -52,7 +52,7 @@
     },
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 18
+      "__id__": 19
     },
     "_id": "04af3862-7ecd-4ef5-9bb3-68818f9bd8b4"
   },
@@ -75,13 +75,13 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 15
-      },
-      {
         "__id__": 16
       },
       {
         "__id__": 17
+      },
+      {
+        "__id__": 18
       }
     ],
     "_prefab": null,
@@ -298,8 +298,11 @@
       "b": 0,
       "a": 255
     },
-    "_linearGradientOptions": {
+    "_outlineOptions": {
       "__id__": 8
+    },
+    "_linearGradientOptions": {
+      "__id__": 10
     },
     "_string": "dfgAAFSDcxW",
     "_font": {
@@ -349,7 +352,7 @@
       "a": 255
     },
     "tmpUniform": {
-      "__id__": 14
+      "__id__": 15
     },
     "textures": [
       {
@@ -358,6 +361,27 @@
       }
     ],
     "_id": "3b73z2EwhFt7H2jcwQbwdy"
+  },
+  {
+    "__type__": "OutlineOptions",
+    "_isOutlineOn": true,
+    "_outlineThickness": 0.15,
+    "_items": [
+      {
+        "__id__": 9
+      }
+    ]
+  },
+  {
+    "__type__": "OutlineColorItem",
+    "color": {
+      "__type__": "cc.Color",
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "a": 255
+    },
+    "colorRatio": 1
   },
   {
     "__type__": "LinearGradientOptions",
@@ -370,12 +394,6 @@
     },
     "_items": [
       {
-        "__id__": 9
-      },
-      {
-        "__id__": 10
-      },
-      {
         "__id__": 11
       },
       {
@@ -383,6 +401,9 @@
       },
       {
         "__id__": 13
+      },
+      {
+        "__id__": 14
       }
     ]
   },
@@ -431,17 +452,6 @@
     "colorRatio": 0.73
   },
   {
-    "__type__": "LinearGradientItem",
-    "color": {
-      "__type__": "cc.Color",
-      "r": 160,
-      "g": 160,
-      "b": 160,
-      "a": 255
-    },
-    "colorRatio": 0.83
-  },
-  {
     "__type__": "TmpUniform",
     "_faceColor": {
       "__type__": "cc.Color",
@@ -450,17 +460,8 @@
       "b": 0,
       "a": 255
     },
-    "_faceDilate": 0.43,
-    "_faceSoftness": 0,
-    "_enableOutline": true,
-    "_outlineColor": {
-      "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
-      "a": 255
-    },
-    "_outlineThickness": 0.39,
+    "_faceDilate": 0.36,
+    "_faceSoftness": 0.01,
     "_enableUnderlay": false,
     "_underlayColor": {
       "__type__": "cc.Color",
@@ -560,28 +561,28 @@
   {
     "__type__": "cc.SceneGlobals",
     "ambient": {
-      "__id__": 19
-    },
-    "shadows": {
       "__id__": 20
     },
-    "_skybox": {
+    "shadows": {
       "__id__": 21
     },
-    "fog": {
+    "_skybox": {
       "__id__": 22
     },
-    "octree": {
+    "fog": {
       "__id__": 23
     },
-    "skin": {
+    "octree": {
       "__id__": 24
     },
-    "lightProbeInfo": {
+    "skin": {
       "__id__": 25
     },
-    "postSettings": {
+    "lightProbeInfo": {
       "__id__": 26
+    },
+    "postSettings": {
+      "__id__": 27
     },
     "bakedWithStationaryMainLight": false,
     "bakedWithHighpLightmap": false
