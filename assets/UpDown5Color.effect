@@ -108,7 +108,6 @@ CCProgram sprite-fs %{
     vec4 o = CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
 
     // Корректировка gradientPosition с учетом startPoint
-    unlerp
     float gradientPosition =clamp((uv0.y - startPoint) / (1.0 - startPoint), 0.0, 1.0);
 
     vec4 finalColor;

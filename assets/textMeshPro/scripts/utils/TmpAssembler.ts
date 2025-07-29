@@ -177,7 +177,7 @@ export default class TmpAssembler {
             ib[indexOffset++] = start + 3;
             ib[indexOffset++] = start + 2;
         }
-        log(ib);
+        // log(ib);
         meshBuffer.indexOffset += comp.renderData.indexCount;
         meshBuffer.setDirty();
     }
@@ -1312,12 +1312,14 @@ export default class TmpAssembler {
      * Updated additional vertex colors, not taking effect on underscores or deleted lines
      */
     public static updateColorExtra(comp: TextMeshPro): void {
+        log("updateColorExtra");
         const dataList = comp.renderData.data;
         if (!dataList || dataList.length <= 0) {
             return;
         }
 
         if (!JSB) {
+            log("colorExtra updated with no jsb");
             for (let i = 0; i < comp.lettersInfo.length; i++) {
                 let info = comp.lettersInfo[i];
 
@@ -1334,7 +1336,6 @@ export default class TmpAssembler {
 
                 if (comp.vertexColorGradient) {
                     tempColor.set(255, 255, 255, alpha);
-                    console.log(tempColor);
                     tempColor.multiply(comp.colorLB);
                     dataList[offset]["colorExtra"].set(tempColor);
 
@@ -1371,6 +1372,7 @@ export default class TmpAssembler {
                 }
             }
         } else {
+            log("colorExtra updated WITH  jsb");
             const renderData = comp.renderData!;
             const vData = comp.renderData.chunk.vb;
             const vertexCount = renderData.vertexCount;

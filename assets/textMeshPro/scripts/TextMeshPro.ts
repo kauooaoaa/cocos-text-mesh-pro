@@ -435,9 +435,11 @@ export class TmpUniform {
 export default class TextMeshPro extends UIRenderer {
     //#region TMP_PROPS
 
+    @property({
+        serializable: true
+    })
     private _linearGradientOptions: LinearGradientOptions = null;
     @property({
-        serializable: true,
         tooltip: "Text body color",
         type: LinearGradientOptions
     })
@@ -1192,6 +1194,7 @@ export default class TextMeshPro extends UIRenderer {
         this.updateTmpMatOutline(material);
         this.updateTmpMatUnderlay(material);
         this.updateTmpMatGlow(material);
+        this.updateTmpLinearGradient(material);
     }
 
     private _updateTmpMatTexture(material: renderer.MaterialInstance): void {
