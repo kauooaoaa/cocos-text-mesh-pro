@@ -36,7 +36,14 @@ export class LinearGradientItem {
 
 @ccclass("LinearGradientOptions")
 export class LinearGradientOptions {
-    constructor(protected tmp: TextMeshPro) {}
+    constructor(comp: TextMeshPro) {
+        this.comp = comp;
+    }
+
+    @property({
+        serializable: true
+    })
+    comp: TextMeshPro;
     @property
     private _linearGradient: boolean = false;
     @property

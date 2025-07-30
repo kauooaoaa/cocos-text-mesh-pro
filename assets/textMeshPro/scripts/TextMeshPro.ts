@@ -372,19 +372,21 @@ export class TmpUniform {
 export default class TextMeshPro extends UIRenderer {
     //#region TMP_PROPS
 
-    @property
+    @property({
+        serializable: true
+    })
     private _outlineOptions: OutlineOptions = new OutlineOptions(this);
     @property({
         tooltip: "Text body color",
         type: OutlineOptions
     })
     public get outlineOptions(): OutlineOptions {
-        return this._outlineOptions;
-        // ||
-        // (() => {
-        //     this._outlineOptions = new OutlineOptions(this);
-        //     return this._outlineOptions;
-        // })()
+        if (this._outlineOptions && this._outlineOptions.comp)
+            return this._outlineOptions;
+        else {
+            this._outlineOptions = new OutlineOptions(this);
+            return this._outlineOptions;
+        }
     }
     public set outlineOptions(v: OutlineOptions) {
         if (!EDITOR && this._outlineOptions === v) {

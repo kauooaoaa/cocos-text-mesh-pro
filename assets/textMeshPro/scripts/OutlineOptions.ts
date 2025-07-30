@@ -22,11 +22,19 @@ export class OutlineColorItem {
 
 @ccclass("OutlineOptions")
 export class OutlineOptions {
-    constructor(protected _comp: TextMeshPro) {
+    constructor(comp: TextMeshPro) {
+        this.comp = comp;
         // if (!_comp) throw new Error("no parent passed");
     }
 
-    @property
+    @property({
+        serializable: true
+    })
+    comp: TextMeshPro;
+
+    @property({
+        serializable: true
+    })
     private _isOutlineOn: boolean = false;
     @property({ tooltip: "Whether to enable the stroke effect" })
     public get isOutlineEnabled(): boolean {
@@ -37,10 +45,10 @@ export class OutlineOptions {
             return;
         }
         this._isOutlineOn = v;
-        if (!this._comp) {
+        if (!this.comp) {
             return;
         }
-        this._comp.updateTmpMatOutline(this._comp.getMaterialInstance(0));
+        this.comp.updateTmpMatOutline(this.comp.getMaterialInstance(0));
     }
 
     @property
@@ -60,10 +68,10 @@ export class OutlineOptions {
             return;
         }
         this._outlineThickness = v;
-        if (!this._comp) {
+        if (!this.comp) {
             return;
         }
-        this._comp.updateTmpMatOutline(this._comp.getMaterialInstance(0));
+        this.comp.updateTmpMatOutline(this.comp.getMaterialInstance(0));
     }
 
     get numberOfColors() {
@@ -90,16 +98,12 @@ export class OutlineOptions {
         if (value.length > 5) {
             value.length = 5;
         }
-        if (
-            (!EDITOR && this._items === value) ||
-            !this._comp ||
-            !value.length
-        ) {
+        if ((!EDITOR && this._items === value) || !this.comp || !value.length) {
             return;
         }
 
         this._items = value;
-        this._comp.updateTmpMatOutline(this._comp.getMaterialInstance(0));
+        this.comp.updateTmpMatOutline(this.comp.getMaterialInstance(0));
     }
     public get colorUnits() {
         return this._items;
