@@ -21,10 +21,6 @@ CCEffect %{
         texture1: { value: white }
         texture2: { value: white }
         texture3: { value: white }
-        texture4: { value: white }
-        texture5: { value: white }
-        texture6: { value: white }
-        texture7: { value: white }
         
         gradientColor1: { value: [1, 1, 1, 1],  editor: { type: color } }
         gradientColor2: { value: [1, 1, 1, 1],  editor: { type: color } }
@@ -56,10 +52,27 @@ CCEffect %{
         underlayColor: { value: [0, 0, 0, 1],  editor: { type: color } }
         underlayOffsetX: { value: 0, range:[-1, 1, 0.001] }
         underlayOffsetY: { value: 0, range:[-1, 1, 0.001] }
-        underlayDilate: { value: 0.5, range:[0, 1, 0.01] }
-        underlaySoftness: { value: 0.1, range:[0, 1, 0.01] }
+        underlayDilate: { value: 0.6, range:[0, 1, 0.01] }
+        underlaySoftness: { value: 0.05, range:[0, 1, 0.01] }
+        
+        underlayColor2: { value: [1, 1, 0, 1],  editor: { type: color } }
+        underlayOffsetX2: { value: 0.001, range:[-1, 1, 0.001] }
+        underlayOffsetY2: { value: -0.001, range:[-1, 1, 0.001] }
+        underlayDilate2: { value: 0.65, range:[0, 1, 0.01] }
+        underlaySoftness2: { value: 0.05, range:[0, 1, 0.01] }
 
-        # glowColor123: { value: [0, 1] }
+        underlayColor3: { value: [1, 0, 1, 1],  editor: { type: color } }
+        underlayOffsetX3: { value: 0.002, range:[-1, 1, 0.001] }
+        underlayOffsetY3: { value: -0.002, range:[-1, 1, 0.001] }
+        underlayDilate3: { value: 0.7, range:[0, 1, 0.01] }
+        underlaySoftness3: { value: 0.05, range:[0, 1, 0.01] }
+        
+        underlayColor4: { value: [0, 1, 1, 1],  editor: { type: color } }
+        underlayOffsetX4: { value: 0.003, range:[-1, 1, 0.001] }
+        underlayOffsetY4: { value: -0.003, range:[-1, 1, 0.001] }
+        underlayDilate4: { value: 0.75, range:[0, 1, 0.01] }
+        underlaySoftness4: { value: 0.1, range:[0, 1, 0.01] }
+
         glowColor: { value: [0, 1, 0, 1] }
         glowOffset: { value: 0.5, range:[0, 1, 0.01] }
         glowInner: { value: 0.01, range:[0, 1, 0.01] }
@@ -120,6 +133,7 @@ return vec2(cos(angleInRadians), sin(angleInRadians));
 }
 CCProgram tmp-fs %{
 precision highp float;
+#pragma define-mate USE_UNDERLAY range([0, 4])
 #include <builtin/internal/embedded-alpha>
 #include <builtin/internal/alpha-test>
 
@@ -168,12 +182,6 @@ in float texture_idx;
     uniform sampler2D texture2;
     uniform sampler2D texture3;
 #endif
-#if USE_TEXTURE_LEVEL_4
-    uniform sampler2D texture4;
-    uniform sampler2D texture5;
-    uniform sampler2D texture6;
-    uniform sampler2D texture7;
-#endif
 
 uniform Face {
     //Font color will be mixed with vertex color
@@ -202,7 +210,7 @@ uniform Face {
     };
 #endif
 
-#if USE_UNDERLAY
+#if USE_UNDERLAY >= 1
     uniform Underlay {
         //Shadow color will be affected by the vertex alpha value
         vec4 underlayColor;
@@ -211,8 +219,47 @@ uniform Face {
         float underlayOffsetY;
         //Shadow thickness
         float underlayDilate;
-        //Shadow softness
+        //Shadow softnesss
         float underlaySoftness;
+    };
+#endif
+#if USE_UNDERLAY >= 2
+    uniform Underlay2 {
+        //Shadow color will be affected by the vertex alpha value
+        vec4 underlayColor2;
+        //Shadow offset
+        float underlayOffsetX2;
+        float underlayOffsetY2;
+        //Shadow thickness
+        float underlayDilate2;
+        //Shadow softnesss
+        float underlaySoftness2;
+    };
+#endif
+#if USE_UNDERLAY >= 3
+    uniform Underlay3 {
+        //Shadow color will be affected by the vertex alpha value
+        vec4 underlayColor3;
+        //Shadow offset
+        float underlayOffsetX3;
+        float underlayOffsetY3;
+        //Shadow thickness
+        float underlayDilate3;
+        //Shadow softnesss
+        float underlaySoftness3;
+    };
+#endif
+#if USE_UNDERLAY >= 4
+    uniform Underlay4 {
+        //Shadow color will be affected by the vertex alpha value
+        vec4 underlayColor4;
+        //Shadow offset
+        float underlayOffsetX4;
+        float underlayOffsetY4;
+        //Shadow thickness
+        float underlayDilate4;
+        //Shadow softnesss
+        float underlaySoftness4;
     };
 #endif
 
@@ -245,62 +292,100 @@ float projectionRelativeLength(vec2 A, vec2 B) {
 vec4 frag() {
     float curDistance = 0.0;
     
-    #if USE_UNDERLAY
+    #if USE_UNDERLAY >= 1
         float underlayDistance = 0.0;
     #endif
+    #if USE_UNDERLAY >= 2
+        float underlayDistance2 = 0.0;
+    #endif
+    #if USE_UNDERLAY >= 3
+        float underlayDistance3 = 0.0;
+    #endif
+    #if USE_UNDERLAY >= 4
+        float underlayDistance4 = 0.0;
+    #endif
     
-    #if USE_TEXTURE_LEVEL_1
+        #if USE_TEXTURE_LEVEL_1
         if (texture_idx <= 0.0) {
             curDistance = CCSampleWithAlphaSeparated(texture0, uv0).a;
-            #if USE_UNDERLAY
-                underlayDistance = CCSampleWithAlphaSeparated(texture0, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #if USE_UNDERLAY >= 1
+                underlayDistance =
+                 CCSampleWithAlphaSeparated(texture0, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
             #endif
-        }
+            #if USE_UNDERLAY >= 2
+                underlayDistance2 =
+                 CCSampleWithAlphaSeparated(texture0, uv0 + vec2(-underlayOffsetX2, underlayOffsetY2)).a;
+            #endif
+            #if USE_UNDERLAY >= 3
+                underlayDistance3 =
+                 CCSampleWithAlphaSeparated(texture0, uv0 + vec2(-underlayOffsetX3, underlayOffsetY3)).a;
+            #endif
+            #if USE_UNDERLAY >= 4
+                underlayDistance4 =
+                 CCSampleWithAlphaSeparated(texture0, uv0 + vec2(-underlayOffsetX4, underlayOffsetY4)).a;
+            #endif
+            }
     #endif
     #if USE_TEXTURE_LEVEL_2
-        else if (texture_idx <= 1.0) {
+        else if (texture_idx <= 1.0)         if (texture_idx <= 0.0) {
             curDistance = CCSampleWithAlphaSeparated(texture1, uv0).a;
-            #if USE_UNDERLAY
-                underlayDistance = CCSampleWithAlphaSeparated(texture1, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #if USE_UNDERLAY >= 1
+                underlayDistance =
+                 CCSampleWithAlphaSeparated(texture1, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
             #endif
-        }
+            #if USE_UNDERLAY >= 2
+                underlayDistance2 =
+                 CCSampleWithAlphaSeparated(texture1, uv0 + vec2(-underlayOffsetX2, underlayOffsetY2)).a;
+            #endif
+            #if USE_UNDERLAY >= 3
+                underlayDistance3 =
+                 CCSampleWithAlphaSeparated(texture1, uv0 + vec2(-underlayOffsetX3, underlayOffsetY3)).a;
+            #endif
+            #if USE_UNDERLAY >= 4
+                underlayDistance4 =
+                 CCSampleWithAlphaSeparated(texture1, uv0 + vec2(-underlayOffsetX4, underlayOffsetY4)).a;
+            #endif
+            }
     #endif
     #if USE_TEXTURE_LEVEL_3
-        else if (texture_idx <= 2.0) {
-            curDistance = CCSampleWithAlphaSeparated(texture2, uv0).a;
-            #if USE_UNDERLAY
-                underlayDistance = CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+        else if (texture_idx <= 2.0) {curDistance = CCSampleWithAlphaSeparated(texture2, uv0).a;
+            #if USE_UNDERLAY >= 1
+                underlayDistance =
+                 CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
             #endif
-        } else if (texture_idx <= 3.0) {
-            curDistance = CCSampleWithAlphaSeparated(texture3, uv0).a;
-            #if USE_UNDERLAY
-                underlayDistance = CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #if USE_UNDERLAY >= 2
+                underlayDistance2 =
+                 CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX2, underlayOffsetY2)).a;
             #endif
-        }
+            #if USE_UNDERLAY >= 3
+                underlayDistance3 =
+                 CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX3, underlayOffsetY3)).a;
+            #endif
+            #if USE_UNDERLAY >= 4
+                underlayDistance4 =
+                 CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX4, underlayOffsetY4)).a;
+            #endif
+            } else if (texture_idx <= 3.0) {curDistance = CCSampleWithAlphaSeparated(texture3, uv0).a;
+            #if USE_UNDERLAY >= 1
+                underlayDistance =
+                 CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+            #endif
+            #if USE_UNDERLAY >= 2
+                underlayDistance2 =
+                 CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX2, underlayOffsetY2)).a;
+            #endif
+            #if USE_UNDERLAY >= 3
+                underlayDistance3 =
+                 CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX3, underlayOffsetY3)).a;
+            #endif
+            #if USE_UNDERLAY >= 4
+                underlayDistance4 =
+                 CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX4, underlayOffsetY4)).a;
+            #endif
+            }
     #endif
-    #if USE_TEXTURE_LEVEL_4
-        else if (texture_idx <= 4.0) {
-            curDistance = CCSampleWithAlphaSeparated(texture4, uv0).a;
-            #if USE_UNDERLAY
-                underlayDistance = CCSampleWithAlphaSeparated(texture4, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-            #endif
-        } else if (texture_idx <= 5.0) {
-            curDistance = CCSampleWithAlphaSeparated(texture5, uv0).a;
-            #if USE_UNDERLAY
-                underlayDistance = CCSampleWithAlphaSeparated(texture5, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-            #endif
-        } else if (texture_idx <= 6.0) {
-            curDistance = CCSampleWithAlphaSeparated(texture6, uv0).a;
-            #if USE_UNDERLAY
-                underlayDistance = CCSampleWithAlphaSeparated(texture6, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-            #endif
-        } else if (texture_idx <= 7.0) {
-            curDistance = CCSampleWithAlphaSeparated(texture7, uv0).a;
-            #if USE_UNDERLAY
-                underlayDistance = CCSampleWithAlphaSeparated(texture7, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-            #endif
-        }
-    #endif
+
+        
     
     float faceValue = 1.0 - faceDilate;
     float faceDistance = smoothstep(faceValue - faceSoftness, faceValue + faceSoftness, curDistance);
@@ -331,136 +416,168 @@ vec4 frag() {
         float colorAspect;
         
         if (gradientPosition < gradientColorRatio1) {
-            fragColor.rgb =gradientColor1.rgb;
+            fragColor.rgb = gradientColor1.rgb;
         } else if (gradientPosition < gradientColorRatio2) {
-            colorAspect = unlerp(gradientPosition,gradientColorRatio1,gradientColorRatio2);
+            colorAspect = unlerp(gradientPosition, gradientColorRatio1, gradientColorRatio2);
             fragColor.rgb = mix(gradientColor1, gradientColor2, colorAspect).rgb;
         }
         #if USE_LINEAR_GRADIENT_3
             else if (gradientPosition < gradientColorRatio3) {
-                colorAspect = unlerp(gradientPosition,gradientColorRatio2,gradientColorRatio3);
+                colorAspect = unlerp(gradientPosition, gradientColorRatio2, gradientColorRatio3);
                 fragColor.rgb = mix(gradientColor2, gradientColor3, colorAspect).rgb;
             }
         #endif
         #if USE_LINEAR_GRADIENT_4
             else if (gradientPosition < gradientColorRatio4) {
-                colorAspect = unlerp(gradientPosition,gradientColorRatio3,gradientColorRatio4);
+                colorAspect = unlerp(gradientPosition, gradientColorRatio3, gradientColorRatio4);
                 fragColor.rgb = mix(gradientColor3, gradientColor4, colorAspect).rgb;
             }
         #endif
         #if USE_LINEAR_GRADIENT_5
             else if (gradientPosition < gradientColorRatio5) {
-                colorAspect = unlerp(gradientPosition,gradientColorRatio4,gradientColorRatio5);
+                colorAspect = unlerp(gradientPosition, gradientColorRatio4, gradientColorRatio5);
                 fragColor.rgb = mix(gradientColor4, gradientColor5, colorAspect).rgb;
             }
         #endif
-        else if (gradientPosition < 1.0){
-            vec4 lastColor =vec4(gradientColor2.rgb,1);
+        
+        else if (gradientPosition < 1.0) {
+            vec4 lastColor = vec4(gradientColor2.rgb, 1);
             #if USE_LINEAR_GRADIENT_3
                 lastColor.rgb = gradientColor3.rgb;
-            #endif 
+            #endif
             #if USE_LINEAR_GRADIENT_4
-            lastColor.rgb = gradientColor4.rgb;
-            #endif 
+                lastColor.rgb = gradientColor4.rgb;
+            #endif
             #if USE_LINEAR_GRADIENT_5
-            lastColor.rgb = gradientColor5.rgb;
-            #endif 
+                lastColor.rgb = gradientColor5.rgb;
+            #endif
             fragColor.rgb = lastColor.rgb;
         }
     #endif
-
-        #if USE_VERTEX_GRADIENT
-        fragColor.rgb = mix(fragColor.rgb,color.rgb,color.a);
+    
+    #if USE_VERTEX_GRADIENT
+        fragColor.rgb = mix(fragColor.rgb, color.rgb, color.a);
+    #endif
+    
+    #if USE_OUTLINE
+        float outEdge1 = faceValue - outlineThickness;
+        float outEdge2 = faceValue;
+        float outlineDistance = smoothstep(outEdge1 - faceSoftness,
+            outEdge1 + faceSoftness,
+        curDistance)
+        - smoothstep(outEdge2 - faceSoftness,
+            outEdge2 + faceSoftness,
+        curDistance);
+        float faceClip = step(0.001, faceColor.a);
+        float outClip = step(0.001, outlineColor1.a);
+        float outlineRelativeAspect = clamp(unlerp(curDistance, outEdge1, outEdge2), 0.0, 1.0);
+        vec4 outlineColor = outlineColor1;
+        if (outlineRelativeAspect < outlineColorRatio1) {
+            outlineColor.rgb = outlineColor1.rgb;
+        }
+        #if USE_OUTLINE_2
+            else if (outlineRelativeAspect < outlineColorRatio2) {
+                outlineColor.rgb = outlineColor2.rgb;
+            }
         #endif
-
-        #if USE_OUTLINE
-            float outEdge1 = faceValue - outlineThickness;
-            float outEdge2 = faceValue;
-            float outlineDistance = smoothstep( outEdge1 - faceSoftness, 
-                                                outEdge1 + faceSoftness,
-                                                curDistance) 
-                                    - smoothstep(   outEdge2 - faceSoftness,
-                                                    outEdge2 + faceSoftness,
-                                                    curDistance);
-            float faceClip = step(0.001, faceColor.a);
-            float outClip = step(0.001, outlineColor1.a);
-            float outlineRelativeAspect = clamp(unlerp(curDistance,outEdge1,outEdge2),0.0,1.0);
-            vec4 outlineColor = outlineColor1;
-            // float AoutlineColorRatio1 = 0.1;
-            // float AoutlineColorRatio2 = 0.2;
-            // float AoutlineColorRatio3 = 0.3;
-            // float AoutlineColorRatio4 = 0.4;
-            // float AoutlineColorRatio5 = 0.5;
-
-
-
-            if (outlineRelativeAspect < outlineColorRatio1) {
-            outlineColor.rgb =outlineColor1.rgb;
+        #if USE_OUTLINE_3
+            else if (outlineRelativeAspect < outlineColorRatio3) {
+                outlineColor.rgb = outlineColor3.rgb;
             }
+        #endif
+        #if USE_OUTLINE_4
+            else if (outlineRelativeAspect < outlineColorRatio4) {
+                outlineColor.rgb = outlineColor4.rgb;
+            }
+        #endif
+        #if USE_OUTLINE_5
+            else if (outlineRelativeAspect < outlineColorRatio5) {
+                outlineColor.rgb = outlineColor5.rgb;
+            }
+        #endif
+        else {
+            
+            vec4 lastOutlineColor = vec4(outlineColor1.rgb, 1);
             #if USE_OUTLINE_2
-             else if (outlineRelativeAspect < outlineColorRatio2) {
-                outlineColor.rgb =  outlineColor2.rgb;
-            }
+                lastOutlineColor.rgb = outlineColor2.rgb;
             #endif
             #if USE_OUTLINE_3
-                else if (outlineRelativeAspect < outlineColorRatio3) {
-                    outlineColor.rgb =  outlineColor3.rgb;
-                }
+                lastOutlineColor.rgb = outlineColor3.rgb;
             #endif
             #if USE_OUTLINE_4
-                else if (outlineRelativeAspect < outlineColorRatio4) {
-                    outlineColor.rgb =  outlineColor4.rgb;
-                }
+                lastOutlineColor.rgb = outlineColor4.rgb;
             #endif
             #if USE_OUTLINE_5
-                else if (outlineRelativeAspect < outlineColorRatio5){
-                    outlineColor.rgb =  outlineColor5.rgb;
-                }
-            #endif
-            else {
-                
-                vec4 lastOutlineColor = vec4(outlineColor1.rgb,1);
-                #if USE_OUTLINE_2
-                    lastOutlineColor.rgb = outlineColor2.rgb;
-                #endif 
-                #if USE_OUTLINE_3
-                    lastOutlineColor.rgb = outlineColor3.rgb;
-                #endif 
-                #if USE_OUTLINE_4
-                lastOutlineColor.rgb = outlineColor4.rgb;
-                #endif 
-                #if USE_OUTLINE_5
                 lastOutlineColor.rgb = outlineColor5.rgb;
-                #endif 
-                    outlineColor.rgb =  lastOutlineColor.rgb;
-            }
-
-
-            fragColor.rgb = color.rgb * fragColor.rgb * faceDistance * faceClip + outlineColor.rgb * outlineDistance * outClip;
-            fragColor.a = faceColor.a * faceDistance + outlineColor1.a * outlineDistance;
-        #endif
+            #endif
+            outlineColor.rgb = lastOutlineColor.rgb;
+        }
         
-        #if USE_UNDERLAY
-            float underlayValue = 1.0 - underlayDilate;
-            float underlayAlpha = smoothstep(underlayValue - underlaySoftness, underlayValue + underlaySoftness, underlayDistance);
-            vec4 finalUnderlayColor = vec4(underlayColor.rgb, underlayAlpha * underlayColor.a);
-            
-            if (fragColor.a < 1.0 && finalUnderlayColor.a > 0.0) {
-                fragColor.rgb *= fragColor.a;
-                fragColor += finalUnderlayColor * (1.0 - fragColor.a);
-            }
-        #endif
-        
-        #if USE_GLOW
-            float delta = curDistance - glowOffset;
-            float deltaFactor = step(0.0, delta);
-            float attenuation = pow(abs(delta), glowPower) * 2.0;
-            float alpha = clamp(max(glowInner - attenuation, 0.0) / glowInner, 0.0, 1.0) * deltaFactor + clamp((glowOuter - attenuation) / glowOuter, 0.0, 1.0) * (1.0 - deltaFactor);
-            fragColor += glowColor * glowColor.a * alpha;
-        #endif
-        
-        ALPHA_TEST(fragColor);
-        return fragColor;
-    }
+        fragColor.rgb = color.rgb * fragColor.rgb * faceDistance * faceClip + outlineColor.rgb * outlineDistance * outClip;
+        fragColor.a = faceColor.a * faceDistance + outlineColor1.a * outlineDistance;
+    #endif
     
+    #if USE_UNDERLAY >= 1
+       #if USE_UNDERLAY >= 2
+            float underlayValue2 = 1.0 - underlayDilate2;
+            float underlayAlpha2 
+                = smoothstep(underlayValue2 - underlaySoftness2,
+                             underlayValue2 + underlaySoftness2, underlayDistance2);
+            vec4 finalUnderlayColor2 = vec4(underlayColor2.rgb, underlayAlpha2 * underlayColor2.a);
+            
+            if (fragColor.a < 1.0 && finalUnderlayColor2.a > 0.0) {
+                fragColor.rgb *= fragColor.a;
+                fragColor += finalUnderlayColor2 * (1.0 - fragColor.a);
+            }
+        #endif
+        #if USE_UNDERLAY >= 3
+            float underlayValue3 = 1.0 - underlayDilate3;
+            float underlayAlpha3 
+                = smoothstep(underlayValue3 - underlaySoftness3,
+                             underlayValue3 + underlaySoftness3, underlayDistance3);
+            vec4 finalUnderlayColor3 = vec4(underlayColor3.rgb, underlayAlpha3 * underlayColor3.a);
+            
+            if (fragColor.a < 1.0 && finalUnderlayColor3.a > 0.0) {
+                fragColor.rgb *= fragColor.a;
+                fragColor += finalUnderlayColor3 * (1.0 - fragColor.a);
+            }
+        #endif
+        #if USE_UNDERLAY >= 4
+            float underlayValue4 = 1.0 - underlayDilate4;
+            float underlayAlpha4 
+                = smoothstep(underlayValue4 - underlaySoftness4,
+                             underlayValue4 + underlaySoftness4, underlayDistance4);
+            vec4 finalUnderlayColor4 = vec4(underlayColor4.rgb, underlayAlpha4 * underlayColor4.a);
+            
+            if (fragColor.a < 1.0 && finalUnderlayColor4.a > 0.0) {
+                fragColor.rgb *= fragColor.a;
+                fragColor += finalUnderlayColor4 * (1.0 - fragColor.a);
+            }
+        #endif
+     
+        float underlayValue = 1.0 - underlayDilate;
+        float underlayAlpha = smoothstep(underlayValue - underlaySoftness, underlayValue + underlaySoftness, underlayDistance);
+        vec4 finalUnderlayColor = vec4(underlayColor.rgb, underlayAlpha * underlayColor.a);
+        
+        if (fragColor.a < 1.0 && finalUnderlayColor.a > 0.0) {
+            fragColor.rgb *= fragColor.a;
+            fragColor += finalUnderlayColor * (1.0 - fragColor.a);
+        }
+        
+    #endif
+    
+    #if USE_GLOW
+        float delta = curDistance - glowOffset;
+        float deltaFactor = step(0.0, delta);
+        float attenuation = pow(abs(delta), glowPower) * 2.0;
+        float alpha = clamp(max(glowInner - attenuation, 0.0) / glowInner, 0.0, 1.0) * deltaFactor + clamp((glowOuter - attenuation) / glowOuter, 0.0, 1.0) * (1.0 - deltaFactor);
+        fragColor.rgb = mix(fragColor*fragColor.a,glowColor, alpha*glowColor.a).rgb ;
+        fragColor.a += clamp((alpha *glowColor.a)+fragColor.a ,0.0,1.0);
+    #endif
+    
+    ALPHA_TEST(fragColor);
+    return fragColor;
+}
+
 }%
+//  

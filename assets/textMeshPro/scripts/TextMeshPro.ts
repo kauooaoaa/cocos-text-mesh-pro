@@ -998,12 +998,8 @@ export default class TextMeshPro extends UIRenderer {
                 let arr = [
                     "texture0",
                     "texture1",
-                    "texture2",
+                    "textu  e2",
                     "texture3",
-                    "texture4",
-                    "texture5",
-                    "texture6",
-                    "texture7",
                     "faceColor",
                     "faceDilate",
                     "faceSoftness",
@@ -1285,7 +1281,7 @@ export default class TextMeshPro extends UIRenderer {
         }
 
         material.recompileShaders({
-            USE_UNDERLAY: this.tmpUniform.enableUnderlay
+            USE_UNDERLAY: 1 //this.tmpUniform.enableUnderlayv =
         });
 
         if (this.tmpUniform.enableUnderlay) {

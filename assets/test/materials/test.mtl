@@ -13,7 +13,7 @@
     {
       "USE_TEXTURE_LEVEL_1": true,
       "USE_OUTLINE": true,
-      "USE_UNDERLAY": true,
+      "USE_UNDERLAY": 3,
       "USE_GLOW": true
     }
   ],
