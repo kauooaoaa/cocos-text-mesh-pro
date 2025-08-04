@@ -49,11 +49,11 @@ CCEffect %{
         outlineColorRatio4: { value: 0.6, range:[0, 1, 0.01] }
         outlineThickness: { value: 0.1, range:[0, 1, 0.01]}
 
-        underlayColor: { value: [0, 0, 0, 1],  editor: { type: color } }
-        underlayOffsetX: { value: 0, range:[-1, 1, 0.001] }
-        underlayOffsetY: { value: 0, range:[-1, 1, 0.001] }
-        underlayDilate: { value: 0.6, range:[0, 1, 0.01] }
-        underlaySoftness: { value: 0.05, range:[0, 1, 0.01] }
+        underlayColor1: { value: [0, 0, 0, 1],  editor: { type: color } }
+        underlayOffsetX1: { value: 0, range:[-1, 1, 0.001] }
+        underlayOffsetY1: { value: 0, range:[-1, 1, 0.001] }
+        underlayDilate1: { value: 0.6, range:[0, 1, 0.01] }
+        underlaySoftness1: { value: 0.05, range:[0, 1, 0.01] }
         
         underlayColor2: { value: [1, 1, 0, 1],  editor: { type: color } }
         underlayOffsetX2: { value: 0.001, range:[-1, 1, 0.001] }
@@ -72,6 +72,7 @@ CCEffect %{
         underlayOffsetY4: { value: -0.003, range:[-1, 1, 0.001] }
         underlayDilate4: { value: 0.75, range:[0, 1, 0.01] }
         underlaySoftness4: { value: 0.1, range:[0, 1, 0.01] }
+
 
         glowColor: { value: [0, 1, 0, 1] }
         glowOffset: { value: 0.5, range:[0, 1, 0.01] }
@@ -209,18 +210,18 @@ uniform Face {
         float outlineThickness;
     };
 #endif
-
+#if USE_UNDERLAY >0
 #if USE_UNDERLAY >= 1
     uniform Underlay {
         //Shadow color will be affected by the vertex alpha value
-        vec4 underlayColor;
+        vec4 underlayColor1;
         //Shadow offset
-        float underlayOffsetX;
-        float underlayOffsetY;
+        float underlayOffsetX1;
+        float underlayOffsetY1;
         //Shadow thickness
-        float underlayDilate;
+        float underlayDilate1;
         //Shadow softnesss
-        float underlaySoftness;
+        float underlaySoftness1;
     };
 #endif
 #if USE_UNDERLAY >= 2
@@ -262,6 +263,7 @@ uniform Face {
         float underlaySoftness4;
     };
 #endif
+#endif
 
 #if USE_GLOW
     uniform Glow {
@@ -292,25 +294,28 @@ float projectionRelativeLength(vec2 A, vec2 B) {
 vec4 frag() {
     float curDistance = 0.0;
     
-    #if USE_UNDERLAY >= 1
-        float underlayDistance = 0.0;
-    #endif
-    #if USE_UNDERLAY >= 2
-        float underlayDistance2 = 0.0;
-    #endif
-    #if USE_UNDERLAY >= 3
-        float underlayDistance3 = 0.0;
-    #endif
-    #if USE_UNDERLAY >= 4
-        float underlayDistance4 = 0.0;
+    #if USE_UNDERLAY >0
+        #if USE_UNDERLAY >= 1
+            float underlayDistance = 0.0;
+        #endif
+        #if USE_UNDERLAY >= 2
+            float underlayDistance2 = 0.0;
+        #endif
+        #if USE_UNDERLAY >= 3
+            float underlayDistance3 = 0.0;
+        #endif
+        #if USE_UNDERLAY >= 4
+            float underlayDistance4 = 0.0;
+        #endif
     #endif
     
         #if USE_TEXTURE_LEVEL_1
         if (texture_idx <= 0.0) {
             curDistance = CCSampleWithAlphaSeparated(texture0, uv0).a;
+            #if USE_UNDERLAY >0
             #if USE_UNDERLAY >= 1
                 underlayDistance =
-                 CCSampleWithAlphaSeparated(texture0, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+                 CCSampleWithAlphaSeparated(texture0, uv0 + vec2(-underlayOffsetX1, underlayOffsetY1)).a;
             #endif
             #if USE_UNDERLAY >= 2
                 underlayDistance2 =
@@ -324,14 +329,16 @@ vec4 frag() {
                 underlayDistance4 =
                  CCSampleWithAlphaSeparated(texture0, uv0 + vec2(-underlayOffsetX4, underlayOffsetY4)).a;
             #endif
+            #endif
             }
     #endif
     #if USE_TEXTURE_LEVEL_2
         else if (texture_idx <= 1.0)         if (texture_idx <= 0.0) {
             curDistance = CCSampleWithAlphaSeparated(texture1, uv0).a;
+            #if USE_UNDERLAY >0
             #if USE_UNDERLAY >= 1
                 underlayDistance =
-                 CCSampleWithAlphaSeparated(texture1, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
+                 CCSampleWithAlphaSeparated(texture1, uv0 + vec2(-underlayOffsetX1, underlayOffsetY1)).a;
             #endif
             #if USE_UNDERLAY >= 2
                 underlayDistance2 =
@@ -345,42 +352,47 @@ vec4 frag() {
                 underlayDistance4 =
                  CCSampleWithAlphaSeparated(texture1, uv0 + vec2(-underlayOffsetX4, underlayOffsetY4)).a;
             #endif
+            #endif
             }
     #endif
     #if USE_TEXTURE_LEVEL_3
         else if (texture_idx <= 2.0) {curDistance = CCSampleWithAlphaSeparated(texture2, uv0).a;
-            #if USE_UNDERLAY >= 1
-                underlayDistance =
-                 CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-            #endif
-            #if USE_UNDERLAY >= 2
-                underlayDistance2 =
-                 CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX2, underlayOffsetY2)).a;
-            #endif
-            #if USE_UNDERLAY >= 3
-                underlayDistance3 =
-                 CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX3, underlayOffsetY3)).a;
-            #endif
-            #if USE_UNDERLAY >= 4
-                underlayDistance4 =
-                 CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX4, underlayOffsetY4)).a;
+            #if USE_UNDERLAY >0
+                #if USE_UNDERLAY >= 1
+                    underlayDistance =
+                    CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX1, underlayOffsetY1)).a;
+                #endif
+                #if USE_UNDERLAY >= 2
+                    underlayDistance2 =
+                    CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX2, underlayOffsetY2)).a;
+                #endif
+                #if USE_UNDERLAY >= 3
+                    underlayDistance3 =
+                    CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX3, underlayOffsetY3)).a;
+                #endif
+                #if USE_UNDERLAY >= 4
+                    underlayDistance4 =
+                    CCSampleWithAlphaSeparated(texture2, uv0 + vec2(-underlayOffsetX4, underlayOffsetY4)).a;
+                #endif
             #endif
             } else if (texture_idx <= 3.0) {curDistance = CCSampleWithAlphaSeparated(texture3, uv0).a;
-            #if USE_UNDERLAY >= 1
-                underlayDistance =
-                 CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX, underlayOffsetY)).a;
-            #endif
-            #if USE_UNDERLAY >= 2
-                underlayDistance2 =
-                 CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX2, underlayOffsetY2)).a;
-            #endif
-            #if USE_UNDERLAY >= 3
-                underlayDistance3 =
-                 CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX3, underlayOffsetY3)).a;
-            #endif
-            #if USE_UNDERLAY >= 4
-                underlayDistance4 =
-                 CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX4, underlayOffsetY4)).a;
+            #if USE_UNDERLAY >0
+                #if USE_UNDERLAY >= 1
+                    underlayDistance =
+                    CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX1, underlayOffsetY1)).a;
+                #endif
+                #if USE_UNDERLAY >= 2
+                    underlayDistance2 =
+                    CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX2, underlayOffsetY2)).a;
+                #endif
+                #if USE_UNDERLAY >= 3
+                    underlayDistance3 =
+                    CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX3, underlayOffsetY3)).a;
+                #endif
+                #if USE_UNDERLAY >= 4
+                    underlayDistance4 =
+                    CCSampleWithAlphaSeparated(texture3, uv0 + vec2(-underlayOffsetX4, underlayOffsetY4)).a;
+                #endif
             #endif
             }
     #endif
@@ -518,16 +530,26 @@ vec4 frag() {
     #endif
     
     #if USE_UNDERLAY >= 1
-       #if USE_UNDERLAY >= 2
+        float underlayValue = 1.0 - underlayDilate1;
+        float underlayAlpha = smoothstep(underlayValue - underlaySoftness1, underlayValue + underlaySoftness1, underlayDistance);
+        vec4 finalShadColor = vec4(underlayColor1.rgb, underlayAlpha * underlayColor1.a);
+        
+        if (fragColor.a < 1.0 && finalShadColor.a > 0.0) {
+            fragColor.rgb *= fragColor.a;
+            fragColor += finalShadColor * (1.0 - fragColor.a);
+        }
+
+    #endif
+        #if USE_UNDERLAY >= 2
             float underlayValue2 = 1.0 - underlayDilate2;
             float underlayAlpha2 
                 = smoothstep(underlayValue2 - underlaySoftness2,
                              underlayValue2 + underlaySoftness2, underlayDistance2);
-            vec4 finalUnderlayColor2 = vec4(underlayColor2.rgb, underlayAlpha2 * underlayColor2.a);
+            vec4 finalunderlayColor2 = vec4(underlayColor2.rgb, underlayAlpha2 * underlayColor2.a);
             
-            if (fragColor.a < 1.0 && finalUnderlayColor2.a > 0.0) {
+            if (fragColor.a < 1.0 && finalunderlayColor2.a > 0.0) {
                 fragColor.rgb *= fragColor.a;
-                fragColor += finalUnderlayColor2 * (1.0 - fragColor.a);
+                fragColor += finalunderlayColor2 * (1.0 - fragColor.a);
             }
         #endif
         #if USE_UNDERLAY >= 3
@@ -535,11 +557,11 @@ vec4 frag() {
             float underlayAlpha3 
                 = smoothstep(underlayValue3 - underlaySoftness3,
                              underlayValue3 + underlaySoftness3, underlayDistance3);
-            vec4 finalUnderlayColor3 = vec4(underlayColor3.rgb, underlayAlpha3 * underlayColor3.a);
+            vec4 finalunderlayColor3 = vec4(underlayColor3.rgb, underlayAlpha3 * underlayColor3.a);
             
-            if (fragColor.a < 1.0 && finalUnderlayColor3.a > 0.0) {
+            if (fragColor.a < 1.0 && finalunderlayColor3.a > 0.0) {
                 fragColor.rgb *= fragColor.a;
-                fragColor += finalUnderlayColor3 * (1.0 - fragColor.a);
+                fragColor += finalunderlayColor3 * (1.0 - fragColor.a);
             }
         #endif
         #if USE_UNDERLAY >= 4
@@ -547,24 +569,15 @@ vec4 frag() {
             float underlayAlpha4 
                 = smoothstep(underlayValue4 - underlaySoftness4,
                              underlayValue4 + underlaySoftness4, underlayDistance4);
-            vec4 finalUnderlayColor4 = vec4(underlayColor4.rgb, underlayAlpha4 * underlayColor4.a);
+            vec4 finalunderlayColor4 = vec4(underlayColor4.rgb, underlayAlpha4 * underlayColor4.a);
             
-            if (fragColor.a < 1.0 && finalUnderlayColor4.a > 0.0) {
+            if (fragColor.a < 1.0 && finalunderlayColor4.a > 0.0) {
                 fragColor.rgb *= fragColor.a;
-                fragColor += finalUnderlayColor4 * (1.0 - fragColor.a);
+                fragColor += finalunderlayColor4 * (1.0 - fragColor.a);
             }
         #endif
      
-        float underlayValue = 1.0 - underlayDilate;
-        float underlayAlpha = smoothstep(underlayValue - underlaySoftness, underlayValue + underlaySoftness, underlayDistance);
-        vec4 finalUnderlayColor = vec4(underlayColor.rgb, underlayAlpha * underlayColor.a);
         
-        if (fragColor.a < 1.0 && finalUnderlayColor.a > 0.0) {
-            fragColor.rgb *= fragColor.a;
-            fragColor += finalUnderlayColor * (1.0 - fragColor.a);
-        }
-        
-    #endif
     
     #if USE_GLOW
         float delta = curDistance - glowOffset;

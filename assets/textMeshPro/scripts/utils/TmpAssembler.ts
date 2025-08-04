@@ -80,8 +80,8 @@ let _labelWidth = 0;
 let _labelHeight = 0;
 let _maxLineWidth = 0;
 let QUAD_INDICES;
-
 /** Italic calculation vector */
+
 let _italicVec = v2();
 /** Data required for underscores and strikethroughs */
 let _extraLinesData: {
@@ -92,8 +92,6 @@ let _extraLineDef: TmpFontLetter = null;
 let _ellipsisDef: TmpFontLetter = null;
 let _ellipsisWidth: number = 0;
 
-/** Data required for linear gradients */
-let _colorlikeCodedUVs: IColorLike[] = [];
 /**
  * Character rendering data
  */
@@ -149,18 +147,19 @@ export default class TmpAssembler {
             vData[vertexOffset++] = vec3_temp.x;
             vData[vertexOffset++] = vec3_temp.y;
             vData[vertexOffset++] = vec3_temp.z;
+
             let colorCodedGlyphBounds = vert["color"] as IColorLike;
             if (
                 comp.linearGradientOptions.linearColorGradient &&
-                _colorlikeCodedUVs[i]
+                comp.colorlikeCodedUVs[i]
             ) {
-                colorCodedGlyphBounds = _colorlikeCodedUVs[i];
+                colorCodedGlyphBounds = comp.colorlikeCodedUVs[i];
             }
             Color.toArray(vData, colorCodedGlyphBounds, vertexOffset + 2);
             Color.toArray(vData, vert["colorExtra"], vertexOffset + 6);
             vertexOffset += 11;
         }
-        log(vData);
+        // log(vData);
         // fill index data
 
         const bid = chunk.bufferId;
@@ -1312,14 +1311,12 @@ export default class TmpAssembler {
      * Updated additional vertex colors, not taking effect on underscores or deleted lines
      */
     public static updateColorExtra(comp: TextMeshPro): void {
-        log("updateColorExtra");
         const dataList = comp.renderData.data;
         if (!dataList || dataList.length <= 0) {
             return;
         }
 
         if (!JSB) {
-            log("colorExtra updated with no jsb");
             for (let i = 0; i < comp.lettersInfo.length; i++) {
                 let info = comp.lettersInfo[i];
 
@@ -1365,14 +1362,13 @@ export default class TmpAssembler {
                      *  distorb floats by converting
                      * it to uint8(Color.rgba) and back to float in this.fillbuffer()
                      */
-                    _colorlikeCodedUVs[offset] = colorCodedGlyphBounds;
-                    _colorlikeCodedUVs[offset + 1] = colorCodedGlyphBounds;
-                    _colorlikeCodedUVs[offset + 2] = colorCodedGlyphBounds;
-                    _colorlikeCodedUVs[offset + 3] = colorCodedGlyphBounds;
+                    comp.colorlikeCodedUVs[offset] = colorCodedGlyphBounds;
+                    comp.colorlikeCodedUVs[offset + 1] = colorCodedGlyphBounds;
+                    comp.colorlikeCodedUVs[offset + 2] = colorCodedGlyphBounds;
+                    comp.colorlikeCodedUVs[offset + 3] = colorCodedGlyphBounds;
                 }
             }
         } else {
-            log("colorExtra updated WITH  jsb");
             const renderData = comp.renderData!;
             const vData = comp.renderData.chunk.vb;
             const vertexCount = renderData.vertexCount;

@@ -41,7 +41,8 @@ export class LinearGradientOptions {
     }
 
     @property({
-        serializable: true
+        serializable: true,
+        visible: false
     })
     comp: TextMeshPro;
     @property

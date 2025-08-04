@@ -7,6 +7,7 @@ import {
     error,
     gfx,
     HorizontalTextAlignment,
+    IColorLike,
     JsonAsset,
     log,
     Material,
@@ -27,6 +28,7 @@ import TmpFontConfig from "./utils/TmpFontConfig";
 import TmpUtils from "./utils/TmpUtils";
 import { LinearGradientOptions } from "./LinearGradientOptions";
 import { OutlineOptions } from "./OutlineOptions";
+import { UnderlayOptions } from "./UnderlayOptions";
 
 const { ccclass, property, executeInEditMode } = _decorator;
 
@@ -105,116 +107,6 @@ export class TmpUniform {
             return;
         }
         this._comp.updateTmpMatFace(this._comp.getMaterialInstance(0));
-    }
-
-    @property
-    private _enableUnderlay: boolean = false;
-    @property({ tooltip: "Whether to enable shadow effect" })
-    public get enableUnderlay(): boolean {
-        return this._enableUnderlay;
-    }
-    public set enableUnderlay(v: boolean) {
-        if (!EDITOR && this._enableUnderlay === v) {
-            return;
-        }
-        this._enableUnderlay = v;
-        if (!this._comp) {
-            return;
-        }
-        this._comp.updateTmpMatUnderlay(this._comp.getMaterialInstance(0));
-    }
-
-    @property(Color)
-    private _underlayColor: Color = color(0, 0, 0, 255);
-    @property({
-        tooltip: "Shadow color",
-        type: Color,
-        visible() {
-            return this._enableUnderlay;
-        }
-    })
-    public get underlayColor(): Color {
-        return this._underlayColor;
-    }
-    public set underlayColor(v: Color) {
-        if (!EDITOR && this._underlayColor === v) {
-            return;
-        }
-        this._underlayColor = v;
-        if (!this._comp) {
-            return;
-        }
-        this._comp.updateTmpMatUnderlay(this._comp.getMaterialInstance(0));
-    }
-
-    @property(Vec2)
-    private _underlayOffset: Vec2 = new Vec2(0, 0);
-    @property({
-        tooltip: "Shadow Offset",
-        type: Vec2,
-        range: [-1, 1],
-        visible() {
-            return this._enableUnderlay;
-        }
-    })
-    public get underlayOffset(): Vec2 {
-        return this._underlayOffset;
-    }
-    public set underlayOffset(v: Vec2) {
-        if (!EDITOR && this._underlayOffset === v) {
-            return;
-        }
-        this._underlayOffset = v;
-        if (!this._comp) {
-            return;
-        }
-        this._comp.updateTmpMatUnderlay(this._comp.getMaterialInstance(0));
-    }
-
-    @property
-    private _underlayDilate: number = 0.5;
-    @property({
-        tooltip: "Shadow thickness",
-        range: [0, 1, 0.01],
-        visible() {
-            return this._enableUnderlay;
-        }
-    })
-    public get underlayDilate(): number {
-        return this._underlayDilate;
-    }
-    public set underlayDilate(v: number) {
-        if (!EDITOR && this._underlayDilate === v) {
-            return;
-        }
-        this._underlayDilate = v;
-        if (!this._comp) {
-            return;
-        }
-        this._comp.updateTmpMatUnderlay(this._comp.getMaterialInstance(0));
-    }
-
-    @property
-    private _underlaySoftness: number = 0.1;
-    @property({
-        tooltip: "Shadow Softness",
-        range: [0, 1, 0.01],
-        visible() {
-            return this._enableUnderlay;
-        }
-    })
-    public get underlaySoftness(): number {
-        return this._underlaySoftness;
-    }
-    public set underlaySoftness(v: number) {
-        if (!EDITOR && this._underlaySoftness === v) {
-            return;
-        }
-        this._underlaySoftness = v;
-        if (!this._comp) {
-            return;
-        }
-        this._comp.updateTmpMatUnderlay(this._comp.getMaterialInstance(0));
     }
 
     @property
@@ -371,13 +263,11 @@ export class TmpUniform {
 @executeInEditMode
 export default class TextMeshPro extends UIRenderer {
     //#region TMP_PROPS
-
     @property({
         serializable: true
     })
-    private _outlineOptions: OutlineOptions = new OutlineOptions(this);
+    private _outlineOptions: OutlineOptions = null;
     @property({
-        tooltip: "Text body color",
         type: OutlineOptions
     })
     public get outlineOptions(): OutlineOptions {
@@ -401,7 +291,6 @@ export default class TextMeshPro extends UIRenderer {
     })
     private _linearGradientOptions: LinearGradientOptions = null;
     @property({
-        tooltip: "Text body color",
         type: LinearGradientOptions
     })
     public get linearGradientOptions(): LinearGradientOptions {
@@ -420,6 +309,31 @@ export default class TextMeshPro extends UIRenderer {
         this._linearGradientOptions = v;
         this.updateTmpLinearGradient(this.getMaterialInstance(0));
     }
+
+    @property({
+        serializable: true
+    })
+    private _underlayOptions: UnderlayOptions = null;
+    @property({
+        type: UnderlayOptions
+    })
+    public get underlayOptions(): UnderlayOptions {
+        return (
+            this._underlayOptions ||
+            (() => {
+                this._underlayOptions = new UnderlayOptions(this);
+                return this._underlayOptions;
+            })()
+        );
+    }
+    public set underlayOptions(v: UnderlayOptions) {
+        if (!EDITOR && this._underlayOptions === v) {
+            return;
+        }
+        this._underlayOptions = v;
+        this.updateTmpLinearGradient(this.getMaterialInstance(0));
+    }
+
     protected _color: Color = Color.WHITE.clone();
     @property({
         visible() {
@@ -817,8 +731,10 @@ export default class TextMeshPro extends UIRenderer {
     protected _assembler: typeof TmpAssembler = null;
     private _colorExtraDirty: boolean = false;
 
+    public colorlikeCodedUVs: IColorLike[] = [];
+
     private _richTextDeltaX: number = 0;
-    /** Record the difference between letter right and next token x for use in rich text typesetting */
+    /** Record the differencbe between letter right and next token x for use in rich text typesetting */
     public get richTextDeltaX(): number {
         return this._richTextDeltaX;
     }
@@ -978,7 +894,7 @@ export default class TextMeshPro extends UIRenderer {
         if (comp.outlineOptions.isOutlineEnabled) {
             tmpMatDefine |= 1 << 0;
         }
-        if (comp.tmpUniform.enableUnderlay) {
+        if (comp.underlayOptions.isUnderlayEnabled) {
             tmpMatDefine |= 1 << 1;
         }
         if (comp.tmpUniform.enableGlow) {
@@ -1264,14 +1180,8 @@ export default class TextMeshPro extends UIRenderer {
         );
 
         this.outlineOptions.colorUnits.forEach((e, i) => {
-            material.setProperty(
-                `outlineColor${i + 1}`,
-                this.outlineOptions.colorUnits[i].color
-            );
-            material.setProperty(
-                `outlineColorRatio${i + 1}`,
-                this.outlineOptions.colorUnits[i].colorRatio
-            );
+            material.setProperty(`outlineColor${i + 1}`, e.color);
+            material.setProperty(`outlineColorRatio${i + 1}`, e.colorRatio);
         });
     }
 
@@ -1281,30 +1191,31 @@ export default class TextMeshPro extends UIRenderer {
         }
 
         material.recompileShaders({
-            USE_UNDERLAY: 1 //this.tmpUniform.enableUnderlayv =
+            USE_UNDERLAY: this.underlayOptions.isUnderlayEnabled
+                ? this.underlayOptions.numberOfUnderlays
+                : 0
         });
 
-        if (this.tmpUniform.enableUnderlay) {
-            material.setProperty(
-                "underlayColor",
-                this.tmpUniform.underlayColor
-            );
-            material.setProperty(
-                "underlayOffsetX",
-                this.tmpUniform.underlayOffset.x
-            );
-            material.setProperty(
-                "underlayOffsetY",
-                this.tmpUniform.underlayOffset.y
-            );
-            material.setProperty(
-                "underlayDilate",
-                this.tmpUniform.underlayDilate
-            );
-            material.setProperty(
-                "underlaySoftness",
-                this.tmpUniform.underlaySoftness
-            );
+        if (this.underlayOptions.isUnderlayEnabled) {
+            this.underlayOptions.underlayUnits.forEach((e, i) => {
+                material.setProperty(`underlayColor${i + 1}`, e.underlayColor);
+                material.setProperty(
+                    `underlayOffsetX${i + 1}`,
+                    e.underlayOffsetX
+                );
+                material.setProperty(
+                    `underlayOffsetY${i + 1}`,
+                    e.underlayOffsetY
+                );
+                material.setProperty(
+                    `underlayDilate${i + 1}`,
+                    e.underlayDilate
+                );
+                material.setProperty(
+                    `underlaySoftness${i + 1}`,
+                    e.underlaySoftness
+                );
+            });
         }
     }
 
@@ -1313,6 +1224,12 @@ export default class TextMeshPro extends UIRenderer {
             return;
         }
 
+        log("value");
+        log(
+            this.underlayOptions.isUnderlayEnabled
+                ? this.underlayOptions.numberOfUnderlays
+                : 0
+        );
         material.recompileShaders({ USE_GLOW: this.tmpUniform.enableGlow });
 
         if (this.tmpUniform.enableGlow) {

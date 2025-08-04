@@ -28,7 +28,8 @@ export class OutlineOptions {
     }
 
     @property({
-        serializable: true
+        serializable: true,
+        visible: false
     })
     comp: TextMeshPro;
 
@@ -94,7 +95,6 @@ export class OutlineOptions {
         }
     })
     public set colorUnits(value: OutlineColorItem[]) {
-        log(value);
         if (value.length > 5) {
             value.length = 5;
         }
