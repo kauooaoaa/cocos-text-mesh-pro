@@ -1,20 +1,6 @@
-import {
-    Component,
-    tween,
-    Vec3,
-    _decorator,
-    Color,
-    CCInteger,
-    Prefab,
-    CCFloat,
-    math,
-    v3,
-    log
-} from "cc";
-import TextMeshPro from "./TextMeshPro";
-import TmpUtils from "./utils/TmpUtils";
+import { _decorator, CCFloat, Color, v3, Vec3 } from "cc";
 import { EDITOR } from "cc/env";
-import { type } from "os";
+import StylableLabel from "../StylableLabel";
 
 const { ccclass, property } = _decorator;
 
@@ -36,7 +22,7 @@ export class LinearGradientItem {
 
 @ccclass("LinearGradientOptions")
 export class LinearGradientOptions {
-    constructor(comp: TextMeshPro) {
+    constructor(comp: StylableLabel) {
         this.comp = comp;
     }
 
@@ -44,7 +30,7 @@ export class LinearGradientOptions {
         serializable: true,
         visible: false
     })
-    comp: TextMeshPro;
+    comp: StylableLabel;
     @property
     private _linearGradient: boolean = false;
     @property

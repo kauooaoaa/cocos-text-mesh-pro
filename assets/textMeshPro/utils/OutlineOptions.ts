@@ -1,6 +1,6 @@
 import { _decorator, CCFloat, Color, log } from "cc";
 import { EDITOR } from "cc/env";
-import TextMeshPro from "./TextMeshPro";
+import TextMeshPro from "../../../extensions/textmeshpro-tool/textMeshPro/scripts/TextMeshPro";
 
 const { ccclass, property } = _decorator;
 

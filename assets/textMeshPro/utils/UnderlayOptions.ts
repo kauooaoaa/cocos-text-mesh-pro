@@ -1,6 +1,6 @@
-import { _decorator, CCFloat, color, Color, log, v2, Vec2 } from "cc";
+import { _decorator, color, Color, Vec2 } from "cc";
 import { EDITOR } from "cc/env";
-import TextMeshPro from "./TextMeshPro";
+import TextMeshPro from "../../../extensions/textmeshpro-tool/textMeshPro/scripts/TextMeshPro";
 
 const { ccclass, property } = _decorator;
 
@@ -153,8 +153,6 @@ export class UnderlayOptions {
         }
 
         this._items = value;
-        log("units setter");
-        log(this._items);
 
         this.comp.updateTmpMatUnderlay(this.comp.getMaterialInstance(0));
     }
@@ -168,8 +166,6 @@ export class UnderlayOptions {
             retInner.underlayOffsetY /= this.comp.textures[0].height;
             return retInner;
         });
-        log("units dto  getter ");
-        log(ret);
         return ret;
     }
 }
