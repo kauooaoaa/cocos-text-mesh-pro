@@ -1,6 +1,6 @@
 import { _decorator, color, Color, Vec2 } from "cc";
 import { EDITOR } from "cc/env";
-import TextMeshPro from "../../../extensions/textmeshpro-tool/textMeshPro/scripts/TextMeshPro";
+import StylableLabel from "../StylableLabel";
 
 const { ccclass, property } = _decorator;
 
@@ -98,7 +98,7 @@ export class UnderlayColorItem {
 
 @ccclass("UnderlayOptions")
 export class UnderlayOptions {
-    constructor(comp: TextMeshPro) {
+    constructor(comp: StylableLabel) {
         this.comp = comp;
         // if (!_comp) throw new Error("no parent passed");
     }
@@ -107,7 +107,7 @@ export class UnderlayOptions {
         serializable: true,
         visible: false
     })
-    comp: TextMeshPro;
+    comp: StylableLabel;
 
     @property({
         serializable: true

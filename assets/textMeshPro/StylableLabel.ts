@@ -9,7 +9,6 @@ import {
     HorizontalTextAlignment,
     IColorLike,
     JsonAsset,
-    log,
     Material,
     NodeEventType,
     RenderData,
@@ -18,16 +17,15 @@ import {
     StencilManager,
     Texture2D,
     UIRenderer,
-    Vec2,
     Vec3,
     VerticalTextAlignment
 } from "cc";
 import { EDITOR, JSB } from "cc/env";
+import { LinearGradientOptions } from "./utils/LinearGradientOptions";
+import { OutlineOptions } from "./utils/OutlineOptions";
 import TmpAssembler, { TmpLetterInfo } from "./utils/TmpAssembler";
 import TmpFontConfig from "./utils/TmpFontConfig";
 import TmpUtils from "./utils/TmpUtils";
-import { LinearGradientOptions } from "./utils/LinearGradientOptions";
-import { OutlineOptions } from "./utils/OutlineOptions";
 import { UnderlayOptions } from "./utils/UnderlayOptions";
 
 const { ccclass, property, executeInEditMode } = _decorator;

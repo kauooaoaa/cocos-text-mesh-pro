@@ -1,6 +1,6 @@
 import { _decorator, CCFloat, Color, log } from "cc";
 import { EDITOR } from "cc/env";
-import TextMeshPro from "../../../extensions/textmeshpro-tool/textMeshPro/scripts/TextMeshPro";
+import StylableLabel from "../StylableLabel";
 
 const { ccclass, property } = _decorator;
 
@@ -22,7 +22,7 @@ export class OutlineColorItem {
 
 @ccclass("OutlineOptions")
 export class OutlineOptions {
-    constructor(comp: TextMeshPro) {
+    constructor(comp: StylableLabel) {
         this.comp = comp;
         // if (!_comp) throw new Error("no parent passed");
     }
@@ -31,7 +31,7 @@ export class OutlineOptions {
         serializable: true,
         visible: false
     })
-    comp: TextMeshPro;
+    comp: StylableLabel;
 
     @property({
         serializable: true
